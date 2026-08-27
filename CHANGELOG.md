@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Pointed the `[project.urls]` links at the renamed repository
+  (`GitHub-Org-Security-Dashboard`). The distribution name stays `ghorgsec`; only the
+  repository was renamed, and these URLs ship in the wheel metadata.
+- Bumped `actions/checkout` to v7.0.1 and `actions/setup-python` to v7.0.0, updating each
+  SHA pin together with the comment naming its version.
 - Fixed Markdown report rendering so a fixture value carrying line breaks can no longer forge
   document structure. `_escape_cell` and `_escape_inline` guarded only their own delimiter, and
   warnings were rendered with no escaping at all, so a crafted `organization`, repository `name`,

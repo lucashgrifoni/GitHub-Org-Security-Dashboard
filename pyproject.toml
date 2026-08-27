@@ -36,9 +36,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/lucashgrifoni/ghorgsec"
-Repository = "https://github.com/lucashgrifoni/ghorgsec"
-Changelog = "https://github.com/lucashgrifoni/ghorgsec/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/lucashgrifoni/GitHub-Org-Security-Dashboard"
+Repository = "https://github.com/lucashgrifoni/GitHub-Org-Security-Dashboard"
+Changelog = "https://github.com/lucashgrifoni/GitHub-Org-Security-Dashboard/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = [
