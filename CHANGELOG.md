@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Added a CodeQL workflow (`.github/workflows/codeql.yml`) running on push, pull request and
+  weekly. Actions are SHA-pinned with the version named in a comment, `security-events: write`
+  is scoped to the analyze job rather than the workflow, and there is no autobuild step because
+  Python needs none.
 - Documented the behaviour changes above in `README.md` and `docs/SPEC.md`: `not_assessed`
   coverage, duplicate-key and depth rejection, the uniform `Error:`/exit-2 contract, single-line
   flattening of rendered values, and UTF-8 stdout. The changelog recorded them; the docs a user

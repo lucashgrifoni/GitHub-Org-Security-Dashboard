@@ -1,0 +1,51 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly, so a query-pack update finds this code even in a quiet week.
+    - cron: "27 5 * * 1"
+
+# Read-only by default; the analyze job raises only what it needs.
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: CodeQL analyze
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    permissions:
+      contents: read
+      # Only this job uploads results, and only this job gets the scope.
+      security-events: write
+
+    steps:
+      - name: Checkout
+        # actions/checkout v7.0.1 pinned to commit SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        # github/codeql-action v4 pinned to commit SHA
+        uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938
+        with:
+          languages: python
+          # security-extended over the default suite: this project is about
+          # security posture, and the codebase is small enough that the extra
+          # lower-precision queries cost little triage.
+          queries: security-extended
+
+      # No autobuild step: Python is interpreted and CodeQL analyses the source
+      # directly, so there is nothing to compile and no build script to trust.
+
+      - name: Perform CodeQL analysis
+        # github/codeql-action v4 pinned to commit SHA
+        uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938
+        with:
+          category: "/language:python"
