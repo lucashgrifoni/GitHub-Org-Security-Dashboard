@@ -105,6 +105,8 @@ A fixture deve ser local, sintetica e sem dados sensiveis. O loader exige `organ
 
 Estados de controle aceitos: `enabled`, `disabled`, `unknown` e `not_collected`.
 
+A fixture aceita ainda um array opcional `warnings` com avisos nao vazios, renderizados na secao `Warnings` junto ao aviso automatico de que nenhuma chamada ao GitHub foi feita. Avisos repetidos sao deduplicados.
+
 O loader recusa uma fixture que declare a mesma chave JSON duas vezes: `json.loads` manteria a ultima ocorrencia, entao um documento que diz `disabled` e depois `enabled` seria lido como habilitado. Nomes de repositorio duplicados ja eram recusados; e a mesma regra um nivel abaixo. Uma fixture aninhada alem do limite de recursao tambem e recusada. Toda entrada malformada reporta `Error: ...` e sai com codigo 2.
 
 Valores de texto sao achatados em uma linha ao renderizar Markdown, para que uma quebra de linha em um nome ou aviso nao injete titulos nem parta a tabela de postura.

@@ -40,7 +40,7 @@ A fixture e uma fonte sintetica para simular dados de repositorios e controles s
 
 - `organization`: nome nao vazio da organizacao simulada;
 - `generated_at`: datetime ISO com timezone;
-- `repositories`: lista de repositorios com `name` unico e controles modelados;
+- `repositories`: lista de repositorios com `name` unico e um objeto `controls` com os controles modelados;
 - `default_branch`: branch padrao opcional por repositorio;
 - `visibility`: visibilidade opcional por repositorio;
 - `warnings`: lista opcional de avisos nao vazios.
