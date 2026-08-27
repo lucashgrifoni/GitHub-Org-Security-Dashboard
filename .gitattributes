@@ -1,0 +1,9 @@
+# Normalize all text to LF in the repository, regardless of contributor platform.
+# Without this, line endings depend on each contributor's core.autocrlf setting.
+* text=auto eol=lf
+
+# Never touch binary content.
+*.png binary
+*.jpg binary
+*.ico binary
+*.pdf binary

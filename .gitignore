@@ -1,0 +1,23 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage/
+dist/
+build/
+*.egg-info/
+*.log
+.env
+.env.*
+!.env.example
+
+# Local engineering loop playbooks (process tooling, not part of the package)
+.claude/
+
+# Local working notes (not published)
+STATUS.md
+MATURITY_LOG.md

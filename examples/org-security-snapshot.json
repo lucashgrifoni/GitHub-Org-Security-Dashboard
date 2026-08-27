@@ -1,0 +1,42 @@
+{
+  "organization": "example-org",
+  "generated_at": "2026-05-18T12:00:00+00:00",
+  "warnings": [
+    "Example fixture with synthetic repository names only."
+  ],
+  "repositories": [
+    {
+      "name": "payments-api",
+      "default_branch": "main",
+      "visibility": "private",
+      "controls": {
+        "branch_protection": "enabled",
+        "secret_scanning": "enabled",
+        "code_scanning": "enabled",
+        "dependabot_alerts": "enabled"
+      }
+    },
+    {
+      "name": "legacy-worker",
+      "default_branch": "main",
+      "visibility": "private",
+      "controls": {
+        "branch_protection": "disabled",
+        "secret_scanning": "enabled",
+        "code_scanning": "unknown",
+        "dependabot_alerts": "disabled"
+      }
+    },
+    {
+      "name": "docs-site",
+      "default_branch": "main",
+      "visibility": "public",
+      "controls": {
+        "branch_protection": "enabled",
+        "secret_scanning": "not_collected",
+        "code_scanning": "not_collected",
+        "dependabot_alerts": "enabled"
+      }
+    }
+  ]
+}

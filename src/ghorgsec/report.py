@@ -1,0 +1,128 @@
+"""Markdown report rendering for organization security snapshots."""
+
+from ghorgsec.models import OrgSecuritySnapshot, RepositorySecurityControls
+from ghorgsec.risk import RepositoryRisk, rate_snapshot
+from ghorgsec.summary import ControlCoverage, summarize_snapshot
+
+MISSING_REPOSITORY_METADATA = "not_collected"
+
+
+def render_markdown_report(snapshot: OrgSecuritySnapshot) -> str:
+    """Render a basic Markdown dashboard report."""
+
+    lines = [
+        "# GitHub Org Security Dashboard",
+        "",
+        f"- Organization: `{_escape_inline(snapshot.organization)}`",
+        f"- Collection mode: `{_escape_inline(snapshot.collection_mode)}`",
+        f"- Generated at: `{snapshot.generated_at.isoformat()}`",
+        "",
+    ]
+
+    if snapshot.warnings:
+        lines.extend(["## Warnings", ""])
+        lines.extend(f"- {warning}" for warning in snapshot.warnings)
+        lines.append("")
+
+    lines.extend(_summary_section(snapshot))
+
+    lines.extend(
+        [
+            "## Repository Controls",
+            "",
+            "| Repository | Default branch | Visibility | Branch protection | "
+            "Secret scanning | Code scanning | Dependabot alerts |",
+            "| --- | --- | --- | --- | --- | --- | --- |",
+        ]
+    )
+
+    if snapshot.repositories:
+        lines.extend(_repository_row(repository) for repository in snapshot.repositories)
+    else:
+        lines.append(
+            "| _none_ | not_collected | not_collected | not_collected | "
+            "not_collected | not_collected | not_collected |"
+        )
+
+    lines.append("")
+    lines.extend(_risk_section(snapshot))
+
+    return "\n".join(lines)
+
+
+def _risk_section(snapshot: OrgSecuritySnapshot) -> list[str]:
+    lines = [
+        "## Repository Risk",
+        "",
+        "| Repository | Rating | Score | Assessed | Factors |",
+        "| --- | --- | --- | --- | --- |",
+    ]
+
+    risks = rate_snapshot(snapshot)
+    if risks:
+        lines.extend(_risk_row(risk) for risk in risks)
+    else:
+        lines.append("| _none_ | not_assessed | 0 | 0 | - |")
+
+    lines.append("")
+    return lines
+
+
+def _risk_row(risk: RepositoryRisk) -> str:
+    factors = "; ".join(_escape_cell(factor) for factor in risk.factors) or "-"
+    return (
+        f"| {_escape_cell(risk.name)} | {risk.rating.value} | {risk.score} | "
+        f"{risk.assessed_controls} | {factors} |"
+    )
+
+
+def _summary_section(snapshot: OrgSecuritySnapshot) -> list[str]:
+    summary = summarize_snapshot(snapshot)
+
+    lines = [
+        "## Posture Summary",
+        "",
+        f"- Repositories: {summary.total_repositories}",
+        "",
+        "| Control | Enabled | Disabled | Unknown | Not collected | Enabled coverage |",
+        "| --- | --- | --- | --- | --- | --- |",
+    ]
+    lines.extend(_coverage_row(coverage) for coverage in summary.controls)
+    lines.append("")
+    return lines
+
+
+def _coverage_row(coverage: ControlCoverage) -> str:
+    return (
+        f"| {coverage.label} | {coverage.enabled} | {coverage.disabled} | "
+        f"{coverage.unknown} | {coverage.not_collected} | {coverage.coverage_percent}% |"
+    )
+
+
+def _repository_row(repository: RepositorySecurityControls) -> str:
+    return " | ".join(
+        [
+            f"| {_escape_cell(repository.name)}",
+            _optional_cell(repository.default_branch),
+            _optional_cell(repository.visibility),
+            repository.branch_protection.value,
+            repository.secret_scanning.value,
+            repository.code_scanning.value,
+            f"{repository.dependabot_alerts.value} |",
+        ]
+    )
+
+
+def _optional_cell(value: str | None) -> str:
+    if value is None:
+        return MISSING_REPOSITORY_METADATA
+
+    return _escape_cell(value)
+
+
+def _escape_cell(value: str) -> str:
+    return value.replace("|", "\\|")
+
+
+def _escape_inline(value: str) -> str:
+    return value.replace("`", "\\`")
