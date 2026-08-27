@@ -223,5 +223,32 @@ class CliTests(unittest.TestCase):
         self.assertNotIn("typed-by-the-caller", result.stdout)
 
 
+    def test_output_file_bytes_do_not_depend_on_the_platform(self) -> None:
+        """--output must write LF everywhere, so the artifact hashes the same.
+
+        `Path.write_text` translates to the platform line ending by default, so
+        the same fixture produced a CRLF file on Windows and an LF file on
+        Linux. The README advertises deterministic output for automation, and a
+        consumer hashing the report as evidence would get a different digest
+        per platform.
+        """
+
+        with TemporaryDirectory() as directory:
+            fixture = Path(directory) / "snapshot.json"
+            fixture.write_text(json.dumps(_valid_fixture_payload()), encoding="utf-8")
+            target = Path(directory) / "report.md"
+
+            result = runner.invoke(
+                app,
+                ["report", "--fixture", str(fixture), "--output", str(target)],
+            )
+            self.assertEqual(result.exit_code, 0, result.output)
+
+            written = target.read_bytes()
+
+        self.assertNotIn(bytes([13, 10]), written)   # no CRLF
+        self.assertIn(bytes([10]), written)          # but LF is present
+
+
 if __name__ == "__main__":
     unittest.main()

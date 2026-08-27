@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- `--output` now writes LF on every platform. `Path.write_text` translates to the platform line
+  ending by default, so the same fixture produced a CRLF file on Windows and an LF file on
+  Linux, and a consumer hashing the report as evidence got a different digest per platform.
 - Exported `RealCollectionDisabledError` from the package. `allow_network` is a keyword argument
   on an exported function, so the exception is reachable from the public API, but catching it
   meant importing from `ghorgsec.collector` — a module `__all__` does not advertise — while the

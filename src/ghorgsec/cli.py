@@ -80,7 +80,10 @@ def report(
         return
 
     try:
-        output.write_text(rendered, encoding="utf-8")
+        # newline pins LF: without it write_text translates to the platform
+        # line ending, so the same fixture produced a CRLF file on Windows and
+        # an LF file on Linux, and the report hashed differently per platform.
+        output.write_text(rendered, encoding="utf-8", newline="\n")
     except OSError as error:
         # A directory, a missing parent, a read-only location. Path.write_text
         # raises OSError and nothing caught it, so the CLI exited 1 with a
