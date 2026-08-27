@@ -172,5 +172,32 @@ class CliTests(unittest.TestCase):
         self.assertEqual(stream.getvalue(), "plain ascii" + BREAK)
 
 
+    def test_output_to_a_directory_reports_an_error_instead_of_a_traceback(self) -> None:
+        """An unwritable --output path must use the CLI's own error contract.
+
+        `Path.write_text` raises OSError, which nothing caught, so the CLI
+        exited 1 with a raw traceback while every other bad input reports
+        `Error:` and exits 2.
+        """
+
+        with TemporaryDirectory() as directory:
+            result = runner.invoke(
+                app, ["report", "--org", "acme", "--output", directory]
+            )
+
+        self.assertEqual(result.exit_code, 2)
+        self.assertIn("Error:", result.output)
+
+    def test_output_into_a_missing_directory_reports_an_error(self) -> None:
+        with TemporaryDirectory() as directory:
+            target = Path(directory) / "no-such-dir" / "report.md"
+            result = runner.invoke(
+                app, ["report", "--org", "acme", "--output", str(target)]
+            )
+
+        self.assertEqual(result.exit_code, 2)
+        self.assertIn("Error:", result.output)
+
+
 if __name__ == "__main__":
     unittest.main()
