@@ -1,8 +1,9 @@
 """Typer CLI for the read-only GitHub organization security dashboard."""
 
+import sys
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated, NoReturn
+from typing import Annotated, NoReturn, TextIO
 
 import typer
 
@@ -11,6 +12,8 @@ from ghorgsec.fixture_loader import FixtureLoadError, load_snapshot_fixture
 from ghorgsec.models import OrgSecuritySnapshot
 from ghorgsec.report import render_markdown_report
 from ghorgsec.serialize import render_json_report
+
+NEWLINE = "\n"
 
 
 class OutputFormat(StrEnum):
@@ -73,11 +76,36 @@ def report(
     rendered = _render(snapshot, output_format)
 
     if output is None:
-        typer.echo(rendered)
+        write_report(rendered, sys.stdout)
         return
 
     output.write_text(rendered, encoding="utf-8")
     typer.echo(f"Report written to {output}")
+
+
+def write_report(text: str, stream: TextIO) -> None:
+    """Write a rendered report to ``stream`` without losing characters to it.
+
+    ``--output`` pins ``encoding="utf-8"``, but printing inherits the console
+    code page. On a cp1252 console a CJK branch name or a non-Latin warning
+    raised UnicodeEncodeError and exited with a raw traceback, so the tool could
+    produce a report it could not show. Where the stream cannot encode UTF-8 and
+    exposes a binary buffer, the bytes go to the buffer instead: the report is
+    data, and mangling it to fit a terminal would be the worse answer for a tool
+    whose output is meant to be evidence.
+    """
+
+    encoding = (getattr(stream, "encoding", None) or "utf-8").lower()
+    if encoding.replace("-", "").replace("_", "") != "utf8":
+        buffer = getattr(stream, "buffer", None)
+        if buffer is not None:
+            stream.flush()
+            buffer.write((text + NEWLINE).encode("utf-8"))
+            buffer.flush()
+            return
+
+    stream.write(text + NEWLINE)
+    stream.flush()
 
 
 def _render(snapshot: OrgSecuritySnapshot, output_format: OutputFormat) -> str:

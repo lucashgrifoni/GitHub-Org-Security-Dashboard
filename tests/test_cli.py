@@ -1,5 +1,6 @@
 """Unit tests for the Typer CLI surface."""
 
+import io
 import json
 import unittest
 from pathlib import Path
@@ -8,9 +9,10 @@ from typing import Any
 
 from typer.testing import CliRunner
 
-from ghorgsec.cli import app
+from ghorgsec.cli import app, write_report
 
 runner = CliRunner()
+BREAK = "\n"
 
 
 def _valid_fixture_payload() -> dict[str, Any]:
@@ -123,6 +125,51 @@ class CliTests(unittest.TestCase):
 
         self.assertIn("# GitHub Org Security Dashboard", written)
         self.assertIn("| api |", written)
+
+
+    def test_write_report_survives_a_console_that_cannot_encode_the_content(self) -> None:
+        """A stream whose code page cannot hold the report must still receive it.
+
+        `--output` pins encoding="utf-8", but printing inherited the console
+        code page. On cp1252 a CJK branch name or a non-Latin warning raised
+        UnicodeEncodeError and exited with a raw traceback, bypassing the CLI's
+        own Error:/exit-2 convention — the tool could produce a report it could
+        not show.
+        """
+
+        raw = io.BytesIO()
+        console = io.TextIOWrapper(raw, encoding="cp1252", newline="")
+        report = "branch: 主分支 | warning: Сканирование не выполнялось"
+
+        write_report(report, console)
+
+        written = raw.getvalue().decode("utf-8")
+        self.assertEqual(written.rstrip("\n"), report)
+        self.assertTrue(written.endswith("\n"))
+
+    def test_write_report_uses_the_stream_directly_when_it_speaks_utf8(self) -> None:
+        raw = io.BytesIO()
+        console = io.TextIOWrapper(raw, encoding="utf-8", newline="")
+        write_report("plain ascii", console)
+        console.flush()
+
+        self.assertEqual(raw.getvalue().decode("utf-8"), "plain ascii\n")
+
+
+    def test_write_report_falls_back_to_the_text_stream_without_a_buffer(self) -> None:
+        """A non-UTF-8 stream with no binary buffer still gets the text.
+
+        Nothing better is available in that case, so the write goes to the text
+        stream as-is rather than being dropped.
+        """
+
+        class _NoBuffer(io.StringIO):
+            encoding = "cp1252"
+
+        stream = _NoBuffer()
+        write_report("plain ascii", stream)
+
+        self.assertEqual(stream.getvalue(), "plain ascii" + BREAK)
 
 
 if __name__ == "__main__":

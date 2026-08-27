@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Fixed the CLI crashing when the report contains characters the console cannot encode.
+  `--output` pins `encoding="utf-8"`, but printing inherited the console code page, so a CJK
+  branch name, a non-Latin warning or a non-ASCII repository name wrote to a file fine while
+  printing raised `UnicodeEncodeError` and exited 1 with a raw traceback, bypassing the CLI's
+  own `Error:`/exit-2 convention. stdout now receives UTF-8 bytes when the stream cannot encode
+  them, so the report is never silently mangled to fit a terminal.
 - Posture summary now reports `not_assessed` instead of `0%` for a control no repository
   reported on. A control nobody collected and a control disabled everywhere rendered
   identically, which is the misleading 0% that excluding `not_collected` from the denominator
