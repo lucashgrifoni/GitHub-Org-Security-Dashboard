@@ -73,7 +73,7 @@ python -m ghorgsec report --org example-org --repo api
 
 ### Opcoes do comando `report`
 
-- `--org`: nome da organizacao para o relatorio stub (obrigatorio sem `--fixture`).
+- `--org`: nome da organizacao para o relatorio stub (obrigatorio sem `--fixture`; nao combinavel com `--fixture`).
 - `--repo`: nome de repositorio a incluir no stub (repetivel; nao combinavel com `--fixture`).
 - `--fixture`: fixture JSON local a renderizar.
 - `--format`: `md` (padrao) ou `json`.

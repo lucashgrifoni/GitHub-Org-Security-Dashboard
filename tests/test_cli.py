@@ -199,5 +199,29 @@ class CliTests(unittest.TestCase):
         self.assertIn("Error:", result.output)
 
 
+    def test_org_cannot_be_combined_with_fixture(self) -> None:
+        """--org with --fixture must be refused, not silently discarded.
+
+        --repo was already refused for the same conflict. --org was accepted
+        and then ignored: the report carried the organization named in the
+        JSON, not the one the caller typed, with no indication the value had
+        been dropped. On a report about who owns which posture, quietly
+        answering about a different organization is the wrong failure.
+        """
+
+        with TemporaryDirectory() as directory:
+            fixture = Path(directory) / "snapshot.json"
+            fixture.write_text(json.dumps(_valid_fixture_payload()), encoding="utf-8")
+
+            result = runner.invoke(
+                app,
+                ["report", "--org", "typed-by-the-caller", "--fixture", str(fixture)],
+            )
+
+        self.assertEqual(result.exit_code, 2)
+        self.assertIn("--org cannot be combined with --fixture", result.stderr)
+        self.assertNotIn("typed-by-the-caller", result.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()

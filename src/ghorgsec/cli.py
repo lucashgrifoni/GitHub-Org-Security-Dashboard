@@ -67,7 +67,7 @@ def report(
     """Render a Markdown or JSON report from local stub input or a JSON fixture."""
 
     snapshot = (
-        _load_fixture_snapshot(fixture, repo)
+        _load_fixture_snapshot(fixture, org, repo)
         if fixture is not None
         else collect_org_security_snapshot(
             org=_require_org(org), repositories=repo or []
@@ -123,10 +123,15 @@ def _render(snapshot: OrgSecuritySnapshot, output_format: OutputFormat) -> str:
 
 
 def _load_fixture_snapshot(
-    fixture: Path, repo: list[str] | None
+    fixture: Path, org: str | None, repo: list[str] | None
 ) -> OrgSecuritySnapshot:
     if repo:
         _fail("--repo cannot be combined with --fixture; repositories come from JSON.")
+
+    if org is not None:
+        # Previously accepted and then discarded: the report named the
+        # organization from the JSON while the caller had typed another one.
+        _fail("--org cannot be combined with --fixture; the organization comes from JSON.")
 
     try:
         return load_snapshot_fixture(fixture)
