@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- A fixture file that is not valid UTF-8 text now reports `Error:` and exits 2 instead of a raw
+  `UnicodeDecodeError` traceback. It subclasses `ValueError`, not `OSError`, so the existing
+  read handler never saw it.
 - An unwritable `--output` path now reports `Error:` and exits 2 instead of a raw traceback with
   exit 1. A directory, a missing parent directory or a read-only location all raised an
   uncaught `OSError`.
