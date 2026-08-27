@@ -265,6 +265,24 @@ class FixtureLoaderTests(unittest.TestCase):
 
         self.assertIn("nested too deeply", str(caught.exception))
 
+    def test_fixture_that_is_not_utf8_text_fails_as_a_load_error(self) -> None:
+        """Bytes that are not UTF-8 must use the loader's own error.
+
+        ``read_text(encoding="utf-8")`` raises ``UnicodeDecodeError``, which
+        subclasses ``ValueError`` rather than ``OSError``, so the existing
+        handler missed it and the CLI exited 1 with a raw traceback.
+        """
+
+        with TemporaryDirectory() as directory:
+            fixture = Path(directory) / "binary.json"
+            fixture.write_bytes(bytes([0xFF, 0xFE, 0x00, 0x01]) + b"not utf-8")
+
+            with self.assertRaises(FixtureLoadError) as caught:
+                load_snapshot_fixture(fixture)
+
+        self.assertIn("not valid UTF-8", str(caught.exception))
+
+
 
 
 def _valid_fixture_payload() -> dict[str, Any]:

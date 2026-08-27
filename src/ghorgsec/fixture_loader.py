@@ -38,6 +38,12 @@ def load_snapshot_fixture(path: str | Path) -> OrgSecuritySnapshot:
         raise FixtureLoadError(
             f"Unable to read fixture file: {fixture_path}"
         ) from error
+    except UnicodeDecodeError as error:
+        # UnicodeDecodeError subclasses ValueError, not OSError, so the handler
+        # above never saw it and a non-UTF-8 file left as a raw traceback.
+        raise FixtureLoadError(
+            f"Fixture file is not valid UTF-8 text: {fixture_path}"
+        ) from error
 
     try:
         payload = json.loads(raw_fixture, object_pairs_hook=_reject_duplicate_keys)
