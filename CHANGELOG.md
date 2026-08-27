@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Exported `RealCollectionDisabledError` from the package. `allow_network` is a keyword argument
+  on an exported function, so the exception is reachable from the public API, but catching it
+  meant importing from `ghorgsec.collector` — a module `__all__` does not advertise — while the
+  package's other custom exception was exported.
 - `--org` combined with `--fixture` is now refused, matching `--repo`. It was accepted and then
   discarded, so the report named the organization from the JSON while the caller had typed
   another one, with nothing saying the value had been dropped.
