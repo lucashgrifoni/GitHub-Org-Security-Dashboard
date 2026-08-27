@@ -6,6 +6,9 @@ from ghorgsec.summary import ControlCoverage, summarize_snapshot
 
 MISSING_REPOSITORY_METADATA = "not_collected"
 
+# Newlines, tabs and other control characters fold to a space before rendering.
+_CONTROL_CHARACTERS = dict.fromkeys([*range(0x20), 0x7F], " ")
+
 
 def render_markdown_report(snapshot: OrgSecuritySnapshot) -> str:
     """Render a basic Markdown dashboard report."""
@@ -21,7 +24,7 @@ def render_markdown_report(snapshot: OrgSecuritySnapshot) -> str:
 
     if snapshot.warnings:
         lines.extend(["## Warnings", ""])
-        lines.extend(f"- {warning}" for warning in snapshot.warnings)
+        lines.extend(f"- {_single_line(warning)}" for warning in snapshot.warnings)
         lines.append("")
 
     lines.extend(_summary_section(snapshot))
@@ -120,9 +123,22 @@ def _optional_cell(value: str | None) -> str:
     return _escape_cell(value)
 
 
+def _single_line(value: str) -> str:
+    """Collapse a value onto one line so it cannot forge document structure.
+
+    Repository and organization names arrive from a fixture the operator did
+    not necessarily author. Escaping only the delimiter of the surrounding
+    context leaves the line structure open: a value carrying a newline injects
+    Markdown headings and splits a table row, making the report assert a shape
+    the underlying data never supported.
+    """
+
+    return " ".join(value.translate(_CONTROL_CHARACTERS).split())
+
+
 def _escape_cell(value: str) -> str:
-    return value.replace("|", "\\|")
+    return _single_line(value).replace("|", "\\|")
 
 
 def _escape_inline(value: str) -> str:
-    return value.replace("`", "\\`")
+    return _single_line(value).replace("`", "\\`")

@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Fixed Markdown report rendering so a fixture value carrying line breaks can no longer forge
+  document structure. `_escape_cell` and `_escape_inline` guarded only their own delimiter, and
+  warnings were rendered with no escaping at all, so a crafted `organization`, repository `name`,
+  `default_branch` or warning could inject Markdown headings and split a table row — pushing other
+  repositories out of the rendered posture table. Values are now folded onto a single line before
+  rendering; the data is still shown, it just cannot forge structure. The JSON output was never
+  affected. Regression test included.
 - Added `.gitattributes` normalizing all text to LF, so line endings no longer depend on each
   contributor's `core.autocrlf` setting.
 - Corrected the `[project.urls]` Homepage, Repository, and Changelog links, which pointed at a

@@ -94,5 +94,61 @@ class ReportTests(unittest.TestCase):
         self.assertIn("| _none_ | not_collected | not_collected | not_collected |", markdown)
 
 
+    def test_line_breaks_in_rendered_values_cannot_forge_report_structure(self) -> None:
+        """A value carrying newlines must not inject headings or split a table row.
+
+        Repository and organization names come from a fixture the operator did
+        not necessarily write. Escaping only the cell delimiter leaves the line
+        structure open: a value containing a newline forges Markdown headings
+        and breaks the posture table, so the rendered report asserts a shape the
+        underlying data never supported.
+        """
+
+        snapshot = OrgSecuritySnapshot(
+            organization="acme\n\n# Fabricated Title\n\nAll controls verified.",
+            generated_at=datetime(2026, 1, 1, tzinfo=UTC),
+            collection_mode="offline_stub",
+            repositories=(
+                RepositorySecurityControls(
+                    name="good\n\n## Posture Summary\n\n- Repositories: 1\n",
+                    default_branch="main\r\n### injected",
+                    branch_protection=ControlState.DISABLED,
+                    secret_scanning=ControlState.DISABLED,
+                    code_scanning=ControlState.DISABLED,
+                    dependabot_alerts=ControlState.DISABLED,
+                ),
+            ),
+            warnings=("ok\n\n## Injected Section\n\n- No issues found.",),
+        )
+
+        markdown = render_markdown_report(snapshot)
+
+        # The security property is structural: no injected value may become a
+        # heading. The headings must be exactly the ones the renderer emits.
+        self.assertEqual(
+            [line for line in markdown.splitlines() if line.startswith("#")],
+            [
+                "# GitHub Org Security Dashboard",
+                "## Warnings",
+                "## Posture Summary",
+                "## Repository Controls",
+                "## Repository Risk",
+            ],
+        )
+
+        # Every table row stays on exactly one line, so no repository can be
+        # pushed out of the rendered table by a crafted neighbour.
+        rows = [line for line in markdown.splitlines() if line.startswith("|")]
+        # 6 posture-summary rows + 3 control rows + 3 risk rows.
+        self.assertEqual(len(rows), 12)
+        for row in rows:
+            self.assertEqual(len(row.splitlines()), 1)
+
+        # Flattening must not delete operator data: the value is still
+        # rendered, it simply can no longer forge structure.
+        self.assertIn("acme # Fabricated Title All controls verified.", markdown)
+        self.assertIn("good ## Posture Summary - Repositories: 1", markdown)
+
+
 if __name__ == "__main__":
     unittest.main()
