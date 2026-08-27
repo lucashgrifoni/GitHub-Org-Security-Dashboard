@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- `--org` combined with `--fixture` is now refused, matching `--repo`. It was accepted and then
+  discarded, so the report named the organization from the JSON while the caller had typed
+  another one, with nothing saying the value had been dropped.
 - A fixture file that is not valid UTF-8 text now reports `Error:` and exits 2 instead of a raw
   `UnicodeDecodeError` traceback. It subclasses `ValueError`, not `OSError`, so the existing
   read handler never saw it.
