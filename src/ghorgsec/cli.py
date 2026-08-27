@@ -79,7 +79,14 @@ def report(
         write_report(rendered, sys.stdout)
         return
 
-    output.write_text(rendered, encoding="utf-8")
+    try:
+        output.write_text(rendered, encoding="utf-8")
+    except OSError as error:
+        # A directory, a missing parent, a read-only location. Path.write_text
+        # raises OSError and nothing caught it, so the CLI exited 1 with a
+        # traceback while every other bad input reports Error: and exits 2.
+        _fail(f"Unable to write report to {output}: {error.strerror or error}")
+
     typer.echo(f"Report written to {output}")
 
 

@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- An unwritable `--output` path now reports `Error:` and exits 2 instead of a raw traceback with
+  exit 1. A directory, a missing parent directory or a read-only location all raised an
+  uncaught `OSError`.
 - Added a CodeQL workflow (`.github/workflows/codeql.yml`) running on push, pull request and
   weekly. Actions are SHA-pinned with the version named in a comment, `security-events: write`
   is scoped to the analyze job rather than the workflow, and there is no autobuild step because
