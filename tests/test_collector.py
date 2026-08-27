@@ -51,6 +51,26 @@ class CollectorTests(unittest.TestCase):
         self.assertEqual([repo.name for repo in snapshot.repositories], ["alpha", "beta"])
 
 
+    def test_both_custom_exceptions_are_reachable_from_the_package(self) -> None:
+        """A caller must be able to catch what the public API can raise.
+
+        ``allow_network`` is a keyword argument on an exported function, so
+        ``RealCollectionDisabledError`` is reachable from the advertised
+        surface — but it was absent from ``__all__`` while ``FixtureLoadError``
+        was present. Catching it meant importing from ``ghorgsec.collector``,
+        a module the public surface does not advertise.
+        """
+
+        import ghorgsec
+
+        for name in ("FixtureLoadError", "RealCollectionDisabledError"):
+            self.assertIn(name, ghorgsec.__all__)
+            self.assertTrue(hasattr(ghorgsec, name))
+
+        with self.assertRaises(ghorgsec.RealCollectionDisabledError):
+            ghorgsec.collect_org_security_snapshot(org="acme", allow_network=True)
+
+
 if __name__ == "__main__":
     unittest.main()
 

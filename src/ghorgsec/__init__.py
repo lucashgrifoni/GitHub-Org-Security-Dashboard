@@ -1,6 +1,9 @@
 """Read-only GitHub organization security dashboard skeleton."""
 
-from ghorgsec.collector import collect_org_security_snapshot
+from ghorgsec.collector import (
+    RealCollectionDisabledError,
+    collect_org_security_snapshot,
+)
 from ghorgsec.fixture_loader import (
     FixtureLoadError,
     load_snapshot_fixture,
@@ -32,6 +35,7 @@ __all__ = [
     "FixtureLoadError",
     "OrgSecuritySnapshot",
     "PostureSummary",
+    "RealCollectionDisabledError",
     "RepositoryRisk",
     "RepositorySecurityControls",
     "RiskRating",
