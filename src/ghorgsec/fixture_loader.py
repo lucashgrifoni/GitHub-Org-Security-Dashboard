@@ -40,13 +40,35 @@ def load_snapshot_fixture(path: str | Path) -> OrgSecuritySnapshot:
         ) from error
 
     try:
-        payload = json.loads(raw_fixture)
+        payload = json.loads(raw_fixture, object_pairs_hook=_reject_duplicate_keys)
     except JSONDecodeError as error:
         raise FixtureLoadError(
             f"Invalid JSON fixture {fixture_path}: {error.msg}"
         ) from error
 
     return parse_snapshot_fixture(payload)
+
+
+def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Refuse a JSON object that states the same key twice.
+
+    ``json.loads`` keeps the last occurrence, so a fixture saying a control is
+    ``disabled`` and then ``enabled`` is read as enabled: the stronger reading
+    of a document that contradicts itself, chosen silently. Parsers also
+    disagree here — some keep the first, some the last, some reject — so the
+    same file can describe two different postures depending on who reads it.
+    Duplicate repository names are already rejected; this is the same rule for
+    the keys inside them.
+    """
+
+    seen: set[str] = set()
+
+    for key, _ in pairs:
+        if key in seen:
+            raise FixtureLoadError(f"fixture JSON states {key!r} more than once")
+        seen.add(key)
+
+    return dict(pairs)
 
 
 def parse_snapshot_fixture(payload: object) -> OrgSecuritySnapshot:

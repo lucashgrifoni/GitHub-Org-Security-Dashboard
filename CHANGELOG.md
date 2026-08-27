@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Fixture loading now rejects a JSON object that states the same key twice instead of silently
+  keeping the last occurrence. A fixture saying a control was `disabled` and then `enabled` was
+  read as enabled, rated the repository `strong` and reported 100% coverage — the stronger
+  reading of a document that contradicts itself. Duplicate repository names were already
+  rejected; this applies the same rule to the keys inside them.
 - Fixed the CLI crashing when the report contains characters the console cannot encode.
   `--output` pins `encoding="utf-8"`, but printing inherited the console code page, so a CJK
   branch name, a non-Latin warning or a non-ASCII repository name wrote to a file fine while

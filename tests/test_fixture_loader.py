@@ -213,6 +213,38 @@ class FixtureLoaderTests(unittest.TestCase):
                 load_snapshot_fixture(broken)
 
 
+    def test_duplicate_json_key_is_rejected_instead_of_silently_taking_the_last(self) -> None:
+        """A fixture that states a control twice must not be read as either value.
+
+        ``json.loads`` keeps the last occurrence, so a document saying
+        ``disabled`` and then ``enabled`` rendered as enabled, rated the
+        repository strong and reported 100% coverage — the stronger reading of a
+        document that contradicts itself. The loader already refuses duplicate
+        repository names; a duplicate key carrying a control state is the same
+        problem one level down.
+        """
+
+        raw = (
+            '{"organization": "acme",'
+            ' "generated_at": "2026-05-18T12:00:00+00:00",'
+            ' "repositories": [{"name": "payments-api", "controls": {'
+            ' "branch_protection": "disabled",'
+            ' "branch_protection": "enabled",'
+            ' "secret_scanning": "enabled",'
+            ' "code_scanning": "enabled",'
+            ' "dependabot_alerts": "enabled"}}]}'
+        )
+
+        with TemporaryDirectory() as directory:
+            fixture = Path(directory) / "duplicate.json"
+            fixture.write_text(raw, encoding="utf-8")
+
+            with self.assertRaises(FixtureLoadError) as caught:
+                load_snapshot_fixture(fixture)
+
+        self.assertIn("branch_protection", str(caught.exception))
+
+
 def _valid_fixture_payload() -> dict[str, Any]:
     return {
         "organization": "example-org",
