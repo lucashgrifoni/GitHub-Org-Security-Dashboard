@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Documented the behaviour changes above in `README.md` and `docs/SPEC.md`: `not_assessed`
+  coverage, duplicate-key and depth rejection, the uniform `Error:`/exit-2 contract, single-line
+  flattening of rendered values, and UTF-8 stdout. The changelog recorded them; the docs a user
+  actually reads did not.
 - A fixture nested past the interpreter's recursion limit now fails as a fixture load error
   rather than a `RecursionError` traceback with exit 1. It was the one malformed input out of
   ten that did not report `Error:` and exit 2.

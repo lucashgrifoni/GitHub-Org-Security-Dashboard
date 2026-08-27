@@ -105,9 +105,15 @@ A fixture deve ser local, sintetica e sem dados sensiveis. O loader exige `organ
 
 Estados de controle aceitos: `enabled`, `disabled`, `unknown` e `not_collected`.
 
+O loader recusa uma fixture que declare a mesma chave JSON duas vezes: `json.loads` manteria a ultima ocorrencia, entao um documento que diz `disabled` e depois `enabled` seria lido como habilitado. Nomes de repositorio duplicados ja eram recusados; e a mesma regra um nivel abaixo. Uma fixture aninhada alem do limite de recursao tambem e recusada. Toda entrada malformada reporta `Error: ...` e sai com codigo 2.
+
+Valores de texto sao achatados em uma linha ao renderizar Markdown, para que uma quebra de linha em um nome ou aviso nao injete titulos nem parta a tabela de postura.
+
 ## Sumario de postura
 
 O relatorio inclui uma secao `Posture Summary` com contagem por estado de cada controle e a cobertura de "enabled". O denominador da cobertura exclui `not_collected`, para que um snapshot parcial nao reporte 0% enganoso.
+
+Quando nenhum repositorio reportou estado conhecido para um controle, o denominador e zero e a cobertura aparece como `not_assessed`. Um controle que ninguem coletou e um controle desligado em todo lugar sao afirmacoes diferentes, e antes as duas renderizavam como `0%`.
 
 ## Risco por repositorio
 
