@@ -5,6 +5,7 @@ from ghorgsec.risk import RepositoryRisk, rate_snapshot
 from ghorgsec.summary import ControlCoverage, summarize_snapshot
 
 MISSING_REPOSITORY_METADATA = "not_collected"
+NOT_ASSESSED_COVERAGE = "not_assessed"
 
 # Newlines, tabs and other control characters fold to a space before rendering.
 _CONTROL_CHARACTERS = dict.fromkeys([*range(0x20), 0x7F], " ")
@@ -96,9 +97,17 @@ def _summary_section(snapshot: OrgSecuritySnapshot) -> list[str]:
 
 
 def _coverage_row(coverage: ControlCoverage) -> str:
+    # A control nobody collected is not a control that is off. Reporting 0% for
+    # both makes them indistinguishable, so an uncollected control says so —
+    # the same answer the risk table already gives via ``not_assessed``.
+    reported = (
+        NOT_ASSESSED_COVERAGE
+        if coverage.assessed == 0
+        else f"{coverage.coverage_percent}%"
+    )
     return (
         f"| {coverage.label} | {coverage.enabled} | {coverage.disabled} | "
-        f"{coverage.unknown} | {coverage.not_collected} | {coverage.coverage_percent}% |"
+        f"{coverage.unknown} | {coverage.not_collected} | {reported} |"
     )
 
 

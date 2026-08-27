@@ -150,5 +150,40 @@ class ReportTests(unittest.TestCase):
         self.assertIn("good ## Posture Summary - Repositories: 1", markdown)
 
 
+    def test_uncollected_control_reports_not_assessed_instead_of_zero_percent(self) -> None:
+        """No data collected must not render as 0% coverage.
+
+        The risk table already refuses to invent a rating when nothing was
+        assessed and prints ``not_assessed``. The posture summary printed 0%
+        for the same snapshot, which reads as "the control is off everywhere"
+        rather than "nothing was collected" — the exact misleading 0% that
+        excluding ``not_collected`` from the denominator exists to prevent.
+        """
+
+        snapshot = OrgSecuritySnapshot(
+            organization="example-org",
+            generated_at=datetime(2026, 1, 1, tzinfo=UTC),
+            collection_mode="offline_stub",
+            repositories=(
+                RepositorySecurityControls(
+                    name="alpha",
+                    branch_protection=ControlState.NOT_COLLECTED,
+                    secret_scanning=ControlState.NOT_COLLECTED,
+                    code_scanning=ControlState.ENABLED,
+                    dependabot_alerts=ControlState.DISABLED,
+                ),
+            ),
+        )
+
+        markdown = render_markdown_report(snapshot)
+
+        # Nothing assessed -> not_assessed, mirroring the risk table.
+        self.assertIn("| Branch protection | 0 | 0 | 0 | 1 | not_assessed |", markdown)
+        self.assertIn("| Secret scanning | 0 | 0 | 0 | 1 | not_assessed |", markdown)
+        # Genuinely assessed controls still report a real percentage.
+        self.assertIn("| Code scanning | 1 | 0 | 0 | 0 | 100% |", markdown)
+        self.assertIn("| Dependabot alerts | 0 | 1 | 0 | 0 | 0% |", markdown)
+
+
 if __name__ == "__main__":
     unittest.main()

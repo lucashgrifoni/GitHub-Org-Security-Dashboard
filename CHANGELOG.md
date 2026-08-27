@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Posture summary now reports `not_assessed` instead of `0%` for a control no repository
+  reported on. A control nobody collected and a control disabled everywhere rendered
+  identically, which is the misleading 0% that excluding `not_collected` from the denominator
+  exists to prevent, and it contradicted the risk table, which already answers
+  `not_assessed` for the same snapshot. Markdown only; the JSON contract is unchanged.
 - Pointed the `[project.urls]` links at the renamed repository
   (`GitHub-Org-Security-Dashboard`). The distribution name stays `ghorgsec`; only the
   repository was renamed, and these URLs ship in the wheel metadata.

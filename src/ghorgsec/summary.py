@@ -35,6 +35,17 @@ class ControlCoverage:
         return self.enabled + self.disabled + self.unknown + self.not_collected
 
     @property
+    def assessed(self) -> int:
+        """Repositories with a known state for this control.
+
+        Mirrors ``RepositoryRisk.assessed_controls``: it is the denominator of
+        ``coverage_percent``, and zero means the control was never collected,
+        which is not the same as the control being off.
+        """
+
+        return self.enabled + self.disabled + self.unknown
+
+    @property
     def coverage_percent(self) -> int:
         """Percentage of repositories with the control enabled (integer floor).
 
@@ -43,10 +54,9 @@ class ControlCoverage:
         coverage. Returns 0 when no repository has a known state.
         """
 
-        known = self.enabled + self.disabled + self.unknown
-        if known == 0:
+        if self.assessed == 0:
             return 0
-        return self.enabled * 100 // known
+        return self.enabled * 100 // self.assessed
 
 
 @dataclass(frozen=True, slots=True)
