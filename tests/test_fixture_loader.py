@@ -244,6 +244,28 @@ class FixtureLoaderTests(unittest.TestCase):
 
         self.assertIn("branch_protection", str(caught.exception))
 
+    def test_deeply_nested_fixture_fails_as_a_load_error_not_a_recursion_error(self) -> None:
+        """Nesting past the interpreter limit must use the loader's own error.
+
+        ``json.loads`` raises ``RecursionError``, which is not a
+        ``JSONDecodeError``, so it escaped the handler and reached the CLI as a
+        raw traceback with exit 1. Every other malformed fixture reports
+        ``Error:`` and exits 2, so a caller branching on exit codes saw a
+        different answer for one shape of bad input.
+        """
+
+        raw = "[" * 20_000 + "]" * 20_000
+
+        with TemporaryDirectory() as directory:
+            fixture = Path(directory) / "deep.json"
+            fixture.write_text(raw, encoding="utf-8")
+
+            with self.assertRaises(FixtureLoadError) as caught:
+                load_snapshot_fixture(fixture)
+
+        self.assertIn("nested too deeply", str(caught.exception))
+
+
 
 def _valid_fixture_payload() -> dict[str, Any]:
     return {

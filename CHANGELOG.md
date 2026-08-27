@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- A fixture nested past the interpreter's recursion limit now fails as a fixture load error
+  rather than a `RecursionError` traceback with exit 1. It was the one malformed input out of
+  ten that did not report `Error:` and exit 2.
 - Fixture loading now rejects a JSON object that states the same key twice instead of silently
   keeping the last occurrence. A fixture saying a control was `disabled` and then `enabled` was
   read as enabled, rated the repository `strong` and reported 100% coverage — the stronger

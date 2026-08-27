@@ -45,6 +45,13 @@ def load_snapshot_fixture(path: str | Path) -> OrgSecuritySnapshot:
         raise FixtureLoadError(
             f"Invalid JSON fixture {fixture_path}: {error.msg}"
         ) from error
+    except RecursionError as error:
+        # json.loads recurses per nesting level, and RecursionError is not a
+        # JSONDecodeError, so without this it left as a raw traceback and exit 1
+        # while every other malformed fixture reports Error: and exits 2.
+        raise FixtureLoadError(
+            f"Fixture JSON in {fixture_path} is nested too deeply to parse"
+        ) from error
 
     return parse_snapshot_fixture(payload)
 
