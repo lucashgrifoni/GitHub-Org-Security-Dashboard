@@ -43,7 +43,7 @@ Changelog = "https://github.com/lucashgrifoni/GitHub-Org-Security-Dashboard/blob
 [project.optional-dependencies]
 dev = [
     "ruff>=0.15,<0.17",
-    "mypy>=1.18,<2.0",
+    "mypy>=1.18,<3.0",
     "pytest>=9.0.3,<10.0",
     "coverage>=7.0,<8.0",
 ]
