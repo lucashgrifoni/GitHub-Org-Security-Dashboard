@@ -42,7 +42,7 @@ Changelog = "https://github.com/lucashgrifoni/ghorgsec/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = [
-    "ruff>=0.15,<0.16",
+    "ruff>=0.15,<0.17",
     "mypy>=1.18,<2.0",
     "pytest>=9.0.3,<10.0",
     "coverage>=7.0,<8.0",
