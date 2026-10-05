@@ -54,6 +54,22 @@ class RepositoryRisk:
     assessed_controls: int
     factors: tuple[str, ...]
 
+    @property
+    def not_collected_controls(self) -> int:
+        """Modeled controls excluded from this rating because data was not collected."""
+
+        return len(CONTROL_FIELDS) - self.assessed_controls
+
+    @property
+    def assessment_status(self) -> str:
+        """Collection completeness; unknown states still participate in the rubric."""
+
+        if self.assessed_controls == 0:
+            return "not_assessed"
+        if self.not_collected_controls:
+            return "partial"
+        return "complete"
+
 
 def rate_repository(repository: RepositorySecurityControls) -> RepositoryRisk:
     """Compute the deterministic posture rating for one repository."""

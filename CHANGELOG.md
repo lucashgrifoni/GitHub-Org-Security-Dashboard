@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 0.2.0 - 2026-10-05
+
+- Added collection completeness to repository risk: `assessment_status` and
+  `not_collected_controls`, shown in Markdown and JSON without changing scores.
+- Added `assessed` and `coverage_status` to JSON coverage so consumers can distinguish
+  an uncollected control from a collected control with 0% enabled coverage.
+- Refused mixed inline and nested control states instead of silently selecting one source.
+- Rejected non-finite JSON constants and unpaired Unicode surrogates, and handled Python's
+  integer digit limit through the fixture error contract. Invalid input is rejected before
+  an existing output file is opened.
+- Prevented `--output` from overwriting its input fixture, including hard-link aliases.
+- Made stdout and file output byte-identical for a fixture: UTF-8, LF and one final newline.
+- Added 21 regression cases for fixture and output integrity and collection completeness,
+  including Windows newline translation through a UTF-8 stdout stream.
+- Added build and dependency-audit tools to the documented development extra.
+- Expanded CI to Ubuntu/Python 3.12 and 3.13 and Windows/Python 3.12. The protected check
+  aggregates every quality lane and the build, installed-wheel and dependency-audit job.
+- Updated both CodeQL steps to v4.38.2 with verified commit pins, granted the analysis job
+  read access to workflow metadata and grouped future GitHub Actions dependency updates.
+- Defined the maintainer as the code owner for source, workflows and release scripts.
+
 - `--output` now writes LF on every platform. `Path.write_text` translates to the platform line
   ending by default, so the same fixture produced a CRLF file on Windows and an LF file on
   Linux, and a consumer hashing the report as evidence got a different digest per platform.

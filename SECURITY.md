@@ -2,15 +2,14 @@
 
 ## Supported Versions
 
-This project is in pre-release bootstrap. Security fixes target the current
-main development line until the first tagged release exists.
+This project is in alpha. Security fixes target the `0.2.x` release series and
+the current `main` development line.
 
 ## Reporting a Vulnerability
 
 Report privately through GitHub's private vulnerability reporting, which is
 enabled on this repository: open the Security tab and choose "Report a
-vulnerability". The report is visible only to the maintainer until a fix is
-published, so no detail reaches a public issue while the problem is live.
+vulnerability". Reports are handled privately through GitHub security advisories.
 
 Include the affected version or commit, reproduction steps, and expected
 impact. A minimal fixture that triggers the behaviour is the most useful thing

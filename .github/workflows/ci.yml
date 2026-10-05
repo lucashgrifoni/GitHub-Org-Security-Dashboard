@@ -17,9 +17,19 @@ concurrency:
 
 jobs:
   quality:
-    name: Lint, type-check, test
-    runs-on: ubuntu-latest
+    name: Quality (${{ matrix.os }}, Python ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: "3.12"
+          - os: ubuntu-latest
+            python: "3.13"
+          - os: windows-latest
+            python: "3.12"
     steps:
       - name: Checkout
         # actions/checkout v7.0.1 pinned to commit SHA
@@ -31,10 +41,10 @@ jobs:
         # actions/setup-python v7.0.0 pinned to commit SHA
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python }}
 
       - name: Install project with dev dependencies
-        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+        run: python -m pip install -e ".[dev]"
 
       - name: Ruff (lint)
         run: python -m ruff check .
@@ -46,3 +56,53 @@ jobs:
         run: |
           python -m coverage run -m pytest
           python -m coverage report --fail-under=95
+
+  package:
+    name: Build, installed CLI, dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        # actions/checkout v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        # actions/setup-python v7.0.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Install build and audit tools
+        run: python -m pip install -e ".[dev]"
+
+      - name: Audit runtime and development dependencies
+        run: python scripts/audit_environment.py
+
+      - name: Build wheel and source distribution
+        run: python -m build
+
+      - name: Verify the installed wheel outside the source tree
+        shell: bash
+        run: |
+          python -m venv "$RUNNER_TEMP/ghorgsec-smoke"
+          "$RUNNER_TEMP/ghorgsec-smoke/bin/python" -m pip install dist/ghorgsec-*.whl
+          "$RUNNER_TEMP/ghorgsec-smoke/bin/python" scripts/smoke_installed.py examples/org-security-snapshot.json
+
+  required:
+    # Preserve the existing protected-branch check name and require every lane.
+    name: Lint, type-check, test
+    needs: [quality, package]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require successful quality and package jobs
+        shell: bash
+        env:
+          QUALITY_RESULT: ${{ needs.quality.result }}
+          PACKAGE_RESULT: ${{ needs.package.result }}
+        run: |
+          test "$QUALITY_RESULT" = "success"
+          test "$PACKAGE_RESULT" = "success"

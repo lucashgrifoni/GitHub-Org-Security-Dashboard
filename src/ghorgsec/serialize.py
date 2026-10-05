@@ -49,6 +49,8 @@ def _coverage_to_dict(coverage: ControlCoverage) -> dict[str, Any]:
         "not_collected": coverage.not_collected,
         "total": coverage.total,
         "coverage_percent": coverage.coverage_percent,
+        "assessed": coverage.assessed,
+        "coverage_status": "assessed" if coverage.assessed else "not_assessed",
     }
 
 
@@ -72,5 +74,7 @@ def _risk_to_dict(risk: RepositoryRisk) -> dict[str, Any]:
         "rating": risk.rating.value,
         "score": risk.score,
         "assessed_controls": risk.assessed_controls,
+        "not_collected_controls": risk.not_collected_controls,
+        "assessment_status": risk.assessment_status,
         "factors": list(risk.factors),
     }
