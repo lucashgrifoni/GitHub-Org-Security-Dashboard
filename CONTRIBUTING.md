@@ -21,7 +21,8 @@ python scripts/audit_environment.py
 
 O extra `[dev]` instala as ferramentas desses comandos. A auditoria inclui as dependencias
 runtime e de desenvolvimento. O script fixa as versoes instaladas antes de chamar pip-audit,
-sem repetir a resolucao de dependencias. O pacote local e revisado como codigo, pois nao vem
+sem repetir a resolucao de dependencias. Um pacote que nao puder ser auditado faz o check
+falhar; um resultado parcial nao e aceito como sucesso. O pacote local e revisado como codigo, pois nao vem
 de um indice publicado. O job de pacote tambem instala o wheel em um ambiente novo e executa
 `scripts/smoke_installed.py` com uma fixture sintetica.
 

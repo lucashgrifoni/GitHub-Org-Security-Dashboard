@@ -19,6 +19,8 @@ All notable changes to this project will be documented in this file.
 - Added 21 regression cases for fixture and output integrity and collection completeness,
   including Windows newline translation through a UTF-8 stdout stream.
 - Added build and dependency-audit tools to the documented development extra.
+- Made dependency auditing strict: a package that cannot be audited blocks the gate.
+  Added an offline regression using a simulated 404 response through pip-audit.
 - Expanded CI to Ubuntu/Python 3.12 and 3.13 and Windows/Python 3.12. The protected check
   aggregates every quality lane and the build, installed-wheel and dependency-audit job.
 - Updated both CodeQL steps to v4.38.2 with verified commit pins, granted the analysis job

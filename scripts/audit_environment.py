@@ -25,6 +25,7 @@ def main() -> int:
                     sys.executable,
                     "-m",
                     "pip_audit",
+                    "--strict",
                     "--requirement",
                     str(pins),
                     "--no-deps",
