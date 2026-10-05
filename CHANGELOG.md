@@ -30,7 +30,7 @@ All notable changes to this project will be documented in this file.
   Linux, and a consumer hashing the report as evidence got a different digest per platform.
 - Exported `RealCollectionDisabledError` from the package. `allow_network` is a keyword argument
   on an exported function, so the exception is reachable from the public API, but catching it
-  meant importing from `ghorgsec.collector` — a module `__all__` does not advertise — while the
+  meant importing from `ghorgsec.collector`, a module `__all__` does not advertise, while the
   package's other custom exception was exported.
 - `--org` combined with `--fixture` is now refused, matching `--repo`. It was accepted and then
   discarded, so the report named the organization from the JSON while the caller had typed
@@ -54,7 +54,7 @@ All notable changes to this project will be documented in this file.
   ten that did not report `Error:` and exit 2.
 - Fixture loading now rejects a JSON object that states the same key twice instead of silently
   keeping the last occurrence. A fixture saying a control was `disabled` and then `enabled` was
-  read as enabled, rated the repository `strong` and reported 100% coverage — the stronger
+  read as enabled, rated the repository `strong` and reported 100% coverage: the stronger
   reading of a document that contradicts itself. Duplicate repository names were already
   rejected; this applies the same rule to the keys inside them.
 - Fixed the CLI crashing when the report contains characters the console cannot encode.
@@ -76,7 +76,7 @@ All notable changes to this project will be documented in this file.
 - Fixed Markdown report rendering so a fixture value carrying line breaks can no longer forge
   document structure. `_escape_cell` and `_escape_inline` guarded only their own delimiter, and
   warnings were rendered with no escaping at all, so a crafted `organization`, repository `name`,
-  `default_branch` or warning could inject Markdown headings and split a table row — pushing other
+  `default_branch` or warning could inject Markdown headings and split a table row, pushing other
   repositories out of the rendered posture table. Values are now folded onto a single line before
   rendering; the data is still shown, it just cannot forge structure. The JSON output was never
   affected. Regression test included.
