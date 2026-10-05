@@ -6,6 +6,18 @@ Skeleton read-only para consolidar um painel de controles de seguranca por repos
 
 Este projeto ainda nao coleta dados reais. O collector atual e offline, nao acessa GitHub, nao exige token e gera relatorios a partir de nomes sinteticos ou fixtures JSON locais. Todo numero exibido (cobertura, score de risco) deriva apenas de entradas locais fornecidas pelo usuario.
 
+### Uso e divulgacao
+
+A versao atual pode ser usada para processar fixtures sinteticas e demonstrar os relatorios
+Markdown/JSON, a cobertura de controles e a rubrica de risco. A CI valida Ubuntu com Python
+3.12/3.13 e Windows com Python 3.12. Apresente o projeto como uma CLI offline em fase alpha,
+com relatorios derivados de dados locais.
+
+A coleta de organizacoes reais ainda nao esta implementada. Ela depende de um cliente GitHub,
+permissoes, paginacao, tratamento de rate limit e validacao contra um alvo autorizado, como
+descrito na [evolucao planejada](docs/SPEC.md#evolucao-planejada). Os relatorios atuais nao
+comprovam controles de uma organizacao real nem certificam seguranca ou conformidade.
+
 ## Escopo atual
 
 - CLI minima com Typer (`report`).
@@ -75,11 +87,14 @@ Escrever em arquivo:
 ghorgsec report --fixture examples/org-security-snapshot.json -o report.md
 ```
 
-Sem instalacao local, a CLI tambem roda com `PYTHONPATH=src`:
+Depois da instalacao, a CLI tambem pode ser chamada como modulo Python:
 
 ```bash
 python -m ghorgsec report --org example-org --repo api
 ```
+
+Definir `PYTHONPATH=src` apenas torna o codigo fonte importavel; isso nao instala o Typer
+nem suas dependencias. Use a instalacao acima antes de executar os exemplos.
 
 ### Opcoes do comando `report`
 
@@ -172,6 +187,10 @@ python scripts/audit_environment.py
 ```
 
 CI (`.github/workflows/ci.yml`) executa lint, type-check estrito e testes com cobertura, com actions pinadas por commit SHA e permissoes minimas.
+
+O uso da CLI e os testes unitarios sao offline. Clonar, instalar, preparar o build e auditar
+dependencias podem acessar GitHub, o indice de pacotes e o servico de advisories. O modo
+offline da CLI nao abrange essas etapas de preparacao e validacao.
 
 A matriz inclui Ubuntu/Python 3.12, Ubuntu/Python 3.13 e Windows/Python 3.12. O job de pacote
 audita dependencias, gera wheel e sdist e exercita o wheel instalado em um ambiente separado,
