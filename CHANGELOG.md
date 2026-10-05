@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Clarified alpha readiness for offline reports and the planned live-collection work.
+- Corrected module usage prerequisites: setting `PYTHONPATH=src` does not install Typer.
+- Limited the offline guarantee to CLI use and unit tests; installation, builds and
+  dependency audits can use external services. Stub timestamps vary between calls.
+
 ## 0.2.0 - 2026-10-05
 
 - Added collection completeness to repository risk: `assessment_status` and

@@ -60,7 +60,7 @@ O `collection_mode` do snapshot carregado por fixture e sempre `fixture_json`, i
 
 ## Decisoes de Seguranca
 
-- O caminho padrao e offline e deterministico.
+- A CLI e offline. A mesma fixture produz a mesma saida; o stub registra a hora corrente.
 - A CLI nao possui parametro de token.
 - Qualquer tentativa programatica de habilitar rede no collector falha explicitamente.
 - Relatorios sao derivados apenas de entradas fornecidas localmente pelo usuario.
@@ -74,7 +74,8 @@ O `collection_mode` do snapshot carregado por fixture e sempre `fixture_json`, i
 - `python -m coverage run -m pytest` passa (com `pythonpath=src` via configuracao).
 - `python -m ruff check .` e `python -m mypy` (estrito) passam.
 - `python -m build` gera sdist e wheel; o wheel inclui `py.typed`.
-- Nenhum teste ou comando padrao chama GitHub, internet ou API externa.
+- A CLI e os testes unitarios nao chamam GitHub, internet ou API externa. Clone, instalacao,
+  build e auditoria de dependencias podem acessar servicos externos; nao sao operacoes offline.
 - `ghorgsec report --fixture examples/org-security-snapshot.json` gera Markdown a partir de dados sinteticos locais.
 - `ghorgsec report --fixture examples/org-security-snapshot.json --format json` gera JSON valido e deterministico.
 - O README documenta claramente as limitacoes e o modo seguro atual.

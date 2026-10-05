@@ -21,7 +21,7 @@ def collect_org_security_snapshot(
     *,
     allow_network: bool = False,
 ) -> OrgSecuritySnapshot:
-    """Build a deterministic offline snapshot for the requested repositories.
+    """Build an offline snapshot with the current timestamp for the requested repositories.
 
     The current implementation intentionally refuses real network collection.
     This keeps the skeleton safe to run without tokens, external API calls, or
