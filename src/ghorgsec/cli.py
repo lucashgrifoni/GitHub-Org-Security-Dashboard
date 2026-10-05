@@ -73,13 +73,19 @@ def report(
             org=_require_org(org), repositories=repo or []
         )
     )
-    rendered = _render(snapshot, output_format)
+    rendered = _render(snapshot, output_format).rstrip(NEWLINE) + NEWLINE
 
     if output is None:
         write_report(rendered, sys.stdout)
         return
 
     try:
+        if fixture is not None and (
+            output.resolve() == fixture.resolve()
+            or (output.exists() and output.samefile(fixture))
+        ):
+            _fail("--output must not overwrite the input fixture; choose another path.")
+
         # newline pins LF: without it write_text translates to the platform
         # line ending, so the same fixture produced a CRLF file on Windows and
         # an LF file on Linux, and the report hashed differently per platform.
@@ -94,27 +100,22 @@ def report(
 
 
 def write_report(text: str, stream: TextIO) -> None:
-    """Write a rendered report to ``stream`` without losing characters to it.
+    """Write UTF-8 and LF bytes when the stream provides a binary buffer.
 
-    ``--output`` pins ``encoding="utf-8"``, but printing inherits the console
-    code page. On a cp1252 console a CJK branch name or a non-Latin warning
-    raised UnicodeEncodeError and exited with a raw traceback, so the tool could
-    produce a report it could not show. Where the stream cannot encode UTF-8 and
-    exposes a binary buffer, the bytes go to the buffer instead: the report is
-    data, and mangling it to fit a terminal would be the worse answer for a tool
-    whose output is meant to be evidence.
+    Bypassing the text wrapper preserves Unicode and prevents platform newline
+    translation. Text-only streams receive the same text with one final newline.
     """
 
-    encoding = (getattr(stream, "encoding", None) or "utf-8").lower()
-    if encoding.replace("-", "").replace("_", "") != "utf8":
-        buffer = getattr(stream, "buffer", None)
-        if buffer is not None:
-            stream.flush()
-            buffer.write((text + NEWLINE).encode("utf-8"))
-            buffer.flush()
-            return
+    text = text.rstrip(NEWLINE) + NEWLINE
+    # Even a UTF-8 TextIOWrapper can translate LF to CRLF on Windows.
+    buffer = getattr(stream, "buffer", None)
+    if buffer is not None:
+        stream.flush()
+        buffer.write(text.encode("utf-8"))
+        buffer.flush()
+        return
 
-    stream.write(text + NEWLINE)
+    stream.write(text)
     stream.flush()
 
 

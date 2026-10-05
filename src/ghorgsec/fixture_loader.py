@@ -7,7 +7,7 @@ from collections.abc import Mapping
 from datetime import datetime
 from json import JSONDecodeError
 from pathlib import Path
-from typing import Any
+from typing import Any, NoReturn
 
 from ghorgsec.models import (
     ControlState,
@@ -15,6 +15,7 @@ from ghorgsec.models import (
     RepositorySecurityControls,
     Visibility,
 )
+from ghorgsec.summary import CONTROL_FIELDS
 
 FIXTURE_COLLECTION_MODE = "fixture_json"
 SAFE_FIXTURE_WARNING = (
@@ -46,7 +47,11 @@ def load_snapshot_fixture(path: str | Path) -> OrgSecuritySnapshot:
         ) from error
 
     try:
-        payload = json.loads(raw_fixture, object_pairs_hook=_reject_duplicate_keys)
+        payload = json.loads(
+            raw_fixture,
+            object_pairs_hook=_reject_duplicate_keys,
+            parse_constant=_reject_non_finite_number,
+        )
     except JSONDecodeError as error:
         raise FixtureLoadError(
             f"Invalid JSON fixture {fixture_path}: {error.msg}"
@@ -58,8 +63,19 @@ def load_snapshot_fixture(path: str | Path) -> OrgSecuritySnapshot:
         raise FixtureLoadError(
             f"Fixture JSON in {fixture_path} is nested too deeply to parse"
         ) from error
+    except FixtureLoadError:
+        raise
+    except ValueError as error:
+        # Python's integer digit limit raises ValueError rather than JSONDecodeError.
+        raise FixtureLoadError(
+            f"Invalid JSON fixture {fixture_path}: unsupported JSON numeric value"
+        ) from error
 
     return parse_snapshot_fixture(payload)
+
+
+def _reject_non_finite_number(value: str) -> NoReturn:
+    raise FixtureLoadError(f"fixture JSON contains a non-finite number: {value}")
 
 
 def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -168,6 +184,11 @@ def _control_source(
     if controls is None:
         return repository, context
 
+    if any(field in repository for field, _ in CONTROL_FIELDS):
+        raise FixtureLoadError(
+            f"{context} must not mix inline control states with a controls object"
+        )
+
     return _require_mapping(controls, f"{context}.controls"), f"{context}.controls"
 
 
@@ -222,7 +243,7 @@ def _parse_warnings(value: object) -> tuple[str, ...]:
                 f"fixture.warnings[{index}] must be a non-empty string"
             )
 
-        warnings.append(warning.strip())
+        warnings.append(_require_utf8(warning.strip(), f"fixture.warnings[{index}]"))
 
     return tuple(warnings)
 
@@ -256,7 +277,7 @@ def _required_non_empty_string(
     if not isinstance(raw_value, str) or not raw_value.strip():
         raise FixtureLoadError(f"{context}.{key} must be a non-empty string")
 
-    return raw_value.strip()
+    return _require_utf8(raw_value.strip(), f"{context}.{key}")
 
 
 def _optional_non_empty_string(
@@ -270,4 +291,12 @@ def _optional_non_empty_string(
     if not isinstance(raw_value, str) or not raw_value.strip():
         raise FixtureLoadError(f"{context}.{key} must be a non-empty string when set")
 
-    return raw_value.strip()
+    return _require_utf8(raw_value.strip(), f"{context}.{key}")
+
+
+def _require_utf8(value: str, context: str) -> str:
+    try:
+        value.encode("utf-8")
+    except UnicodeEncodeError as error:
+        raise FixtureLoadError(f"{context} must contain valid Unicode text") from error
+    return value

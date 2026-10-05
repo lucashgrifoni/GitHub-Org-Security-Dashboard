@@ -27,13 +27,23 @@ Este projeto ainda nao coleta dados reais. O collector atual e offline, nao aces
 
 ## Setup
 
-Requer Python 3.12.
+Requer Python 3.12 ou mais recente. O projeto esta em fase alpha.
+
+Clone o repositorio e entre na pasta antes de instalar:
+
+```bash
+git clone https://github.com/lucashgrifoni/GitHub-Org-Security-Dashboard.git
+cd GitHub-Org-Security-Dashboard
+python -m venv .venv
+```
+
+Ative o ambiente com `.venv\Scripts\Activate.ps1` no PowerShell ou `source .venv/bin/activate` no Linux.
 
 ```bash
 python -m pip install -e .
 ```
 
-Para desenvolvimento (ruff, mypy, pytest, coverage):
+Para desenvolvimento (ruff, mypy, pytest, coverage, build e pip-audit):
 
 ```bash
 python -m pip install -e ".[dev]"
@@ -111,11 +121,30 @@ O loader recusa uma fixture que declare a mesma chave JSON duas vezes: `json.loa
 
 Valores de texto sao achatados em uma linha ao renderizar Markdown, para que uma quebra de linha em um nome ou aviso nao injete titulos nem parta a tabela de postura.
 
+Os controles tambem podem ser escritos diretamente no objeto do repositorio, sem `controls`.
+A fixture deve escolher uma das duas representacoes por repositorio; misturar as duas e recusado,
+mesmo quando os valores coincidem. O parser recusa `NaN`, `Infinity`, inteiros alem do limite do
+Python e texto com surrogates Unicode isolados.
+
+### Reprodutibilidade e arquivos de saida
+
+Para a mesma fixture, stdout e `--output` produzem os mesmos bytes UTF-8, com LF e uma unica
+quebra de linha final. O modo stub registra a hora da execucao, portanto varia entre chamadas.
+`--output` recusa o caminho da fixture de entrada, inclusive aliases por caminho resolvido ou
+hard link, para preservar a fonte do relatorio. Um arquivo de relatorio existente em outro
+caminho e substituido; escolha um novo nome se precisar preservar a versao anterior.
+
 ## Sumario de postura
 
 O relatorio inclui uma secao `Posture Summary` com contagem por estado de cada controle e a cobertura de "enabled". O denominador da cobertura exclui `not_collected`, para que um snapshot parcial nao reporte 0% enganoso.
 
 Quando nenhum repositorio reportou estado conhecido para um controle, o denominador e zero e a cobertura aparece como `not_assessed`. Um controle que ninguem coletou e um controle desligado em todo lugar sao afirmacoes diferentes, e antes as duas renderizavam como `0%`.
+
+No JSON, cada controle inclui `assessed` (denominador) e `coverage_status` (`assessed` ou
+`not_assessed`). O campo numerico `coverage_percent` preserva o valor `0` quando o denominador
+e zero para manter compatibilidade. Consumidores devem consultar `coverage_status` antes de
+interpretar esse numero. `unknown` participa do denominador e da pontuacao; significa que a
+entrada registrou um estado indeterminado, enquanto `not_collected` fica excluido.
 
 ## Risco por repositorio
 
@@ -126,6 +155,11 @@ Cada repositorio recebe uma classificacao deterministica a partir dos controles 
 
 E uma ajuda de transparencia para o skeleton, nao uma avaliacao de risco real: nunca inventa dados.
 
+Cada linha de risco mostra a quantidade de controles nao coletados e `assessment_status`:
+`complete`, `partial` ou `not_assessed`. Uma classificacao `strong` em uma avaliacao `partial`
+descreve apenas os controles informados. `complete` significa que nenhum controle ficou como
+`not_collected`; controles `unknown` continuam explicitamente indeterminados.
+
 ## Qualidade
 
 ```bash
@@ -133,9 +167,16 @@ python -m ruff check .
 python -m mypy
 python -m coverage run -m pytest
 python -m coverage report
+python -m build
+python scripts/audit_environment.py
 ```
 
 CI (`.github/workflows/ci.yml`) executa lint, type-check estrito e testes com cobertura, com actions pinadas por commit SHA e permissoes minimas.
+
+A matriz inclui Ubuntu/Python 3.12, Ubuntu/Python 3.13 e Windows/Python 3.12. O job de pacote
+audita dependencias, gera wheel e sdist e exercita o wheel instalado em um ambiente separado,
+com a rede bloqueada durante o uso da CLI. O check obrigatorio `Lint, type-check, test` depende
+de todos esses jobs. CodeQL usa o conjunto `security-extended` em um workflow separado.
 
 ## Estrutura
 
@@ -150,3 +191,5 @@ CI (`.github/workflows/ci.yml`) executa lint, type-check estrito e testes com co
 - `src/ghorgsec/serialize.py`: serializacao JSON deterministica.
 - `src/ghorgsec/cli.py`: comandos Typer.
 - `tests/`: testes unitarios.
+- `scripts/smoke_installed.py`: validacao do wheel instalado fora da arvore de fontes.
+- `scripts/audit_environment.py`: auditoria das versoes instaladas, incluindo dependencias transitivas.

@@ -58,15 +58,18 @@ def _risk_section(snapshot: OrgSecuritySnapshot) -> list[str]:
     lines = [
         "## Repository Risk",
         "",
-        "| Repository | Rating | Score | Assessed | Factors |",
-        "| --- | --- | --- | --- | --- |",
+        "Ratings describe the supplied control states only. A partial assessment does not "
+        "establish the posture of controls that were not collected.",
+        "",
+        "| Repository | Rating | Score | Assessed | Not collected | Assessment | Factors |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
     ]
 
     risks = rate_snapshot(snapshot)
     if risks:
         lines.extend(_risk_row(risk) for risk in risks)
     else:
-        lines.append("| _none_ | not_assessed | 0 | 0 | - |")
+        lines.append("| _none_ | not_assessed | 0 | 0 | - | not_assessed | - |")
 
     lines.append("")
     return lines
@@ -76,7 +79,8 @@ def _risk_row(risk: RepositoryRisk) -> str:
     factors = "; ".join(_escape_cell(factor) for factor in risk.factors) or "-"
     return (
         f"| {_escape_cell(risk.name)} | {risk.rating.value} | {risk.score} | "
-        f"{risk.assessed_controls} | {factors} |"
+        f"{risk.assessed_controls} | {risk.not_collected_controls} | "
+        f"{risk.assessment_status} | {factors} |"
     )
 
 

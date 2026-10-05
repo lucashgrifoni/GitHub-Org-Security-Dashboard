@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ghorgsec"
-version = "0.1.0"
+version = "0.2.0"
 description = "Read-only GitHub organization security dashboard skeleton."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -46,6 +46,8 @@ dev = [
     "mypy>=1.18,<3.0",
     "pytest>=9.0.3,<10.0",
     "coverage>=7.0,<8.0",
+    "build>=1.4,<2.0",
+    "pip-audit>=2.10,<3.0",
 ]
 
 [project.scripts]
@@ -76,7 +78,7 @@ known-first-party = ["ghorgsec"]
 
 [tool.mypy]
 python_version = "3.12"
-files = ["src", "tests"]
+files = ["src", "tests", "scripts"]
 strict = true
 warn_unused_configs = true
 warn_redundant_casts = true
