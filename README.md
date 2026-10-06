@@ -44,6 +44,10 @@ ausencia de vulnerabilidades ou conformidade. Consulte o [contrato live](docs/LI
 
 ## Setup
 
+A CI do código-fonte também executa um [piloto de higiene de segredos](docs/secrets-hygiene-pilot.md)
+com Gitleaks e secguard. Ele começa em modo de relatório; falhas de execução
+continuam fazendo o job falhar. A CLI ghorgsec mantém seu uso offline descrito acima.
+
 Requer Python 3.12 ou mais recente. O projeto esta em fase alpha.
 
 Clone o repositorio e entre na pasta antes de instalar:
