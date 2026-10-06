@@ -1,0 +1,105 @@
+name: Release artifacts
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and attest release packages
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - name: Checkout protected release source
+        # actions/checkout v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        # actions/setup-python v7.0.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Verify release source and version
+        env:
+          RELEASE_REF: ${{ github.ref }}
+        run: |
+          git merge-base --is-ancestor HEAD origin/main
+          python - <<'PY'
+          import os, tomllib
+          from pathlib import Path
+          version = tomllib.loads(Path('pyproject.toml').read_text())['project']['version']
+          ref = os.environ['RELEASE_REF']
+          if ref.startswith('refs/tags/') and ref != 'refs/tags/v' + version:
+              raise SystemExit('Release tag does not match the package version')
+          PY
+
+      - name: Build packages
+        run: |
+          python -m pip install -e ".[dev]"
+          export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          python -m build
+
+      - name: Verify installed wheel and inventory its runtime
+        run: |
+          python -m venv "$RUNNER_TEMP/release-runtime"
+          "$RUNNER_TEMP/release-runtime/bin/python" -m pip install dist/ghorgsec-*.whl
+          "$RUNNER_TEMP/release-runtime/bin/python" scripts/smoke_installed.py examples/org-security-snapshot.json
+          "$RUNNER_TEMP/release-runtime/bin/python" - <<'PY'
+          from importlib.metadata import distributions
+          from pathlib import Path
+          pins = sorted(
+              f"{d.metadata['Name']}=={d.version}" for d in distributions()
+              if d.metadata['Name'].lower() not in ('ghorgsec', 'pip')
+          )
+          Path('dist/runtime-requirements.txt').write_text('\n'.join(pins) + '\n')
+          PY
+
+      - name: Audit runtime and generate its SBOM
+        run: |
+          python -m pip_audit --strict --requirement dist/runtime-requirements.txt --no-deps --disable-pip --progress-spinner off --timeout 10 --format cyclonedx-json --output dist/runtime.cdx.json
+
+      - name: Attest build provenance
+        id: provenance
+        # actions/attest v4.2.2, verified upstream commit
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: |
+            dist/ghorgsec-*.whl
+            dist/ghorgsec-*.tar.gz
+          create-storage-record: false
+
+      - name: Attest runtime SBOM
+        id: sbom
+        # actions/attest v4.2.2
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: |
+            dist/ghorgsec-*.whl
+            dist/ghorgsec-*.tar.gz
+          sbom-path: dist/runtime.cdx.json
+          create-storage-record: false
+
+      - name: Retain packages and verification bundles
+        # actions/upload-artifact v7.0.1, verified upstream commit
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: ghorgsec-release-${{ github.ref_name }}
+          path: |
+            dist/*
+            ${{ steps.provenance.outputs.bundle-path }}
+            ${{ steps.sbom.outputs.bundle-path }}
+          if-no-files-found: error
+          retention-days: 30

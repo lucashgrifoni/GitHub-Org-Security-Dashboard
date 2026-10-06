@@ -1,4 +1,4 @@
-"""Read-only GitHub organization security dashboard skeleton."""
+"""Read-only GitHub security dashboard, offline by default."""
 
 from ghorgsec.collector import (
     RealCollectionDisabledError,
@@ -9,6 +9,8 @@ from ghorgsec.fixture_loader import (
     load_snapshot_fixture,
     parse_snapshot_fixture,
 )
+from ghorgsec.github_client import GitHubClient, GitHubCollectionError
+from ghorgsec.live_collector import collect_live_snapshot
 from ghorgsec.models import (
     ControlState,
     OrgSecuritySnapshot,
@@ -33,6 +35,8 @@ __all__ = [
     "ControlCoverage",
     "ControlState",
     "FixtureLoadError",
+    "GitHubClient",
+    "GitHubCollectionError",
     "OrgSecuritySnapshot",
     "PostureSummary",
     "RealCollectionDisabledError",
@@ -40,6 +44,7 @@ __all__ = [
     "RepositorySecurityControls",
     "RiskRating",
     "Visibility",
+    "collect_live_snapshot",
     "collect_org_security_snapshot",
     "load_snapshot_fixture",
     "parse_snapshot_fixture",

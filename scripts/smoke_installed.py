@@ -38,6 +38,8 @@ def main() -> None:
         )
         # Only the guard enters PYTHONPATH; the source tree is never imported.
         environment = dict(os.environ, PYTHONPATH=str(root), PYTHONIOENCODING="utf-8")
+        # A canary token must not opt offline commands into authenticated reads.
+        environment.update(GH_TOKEN="synthetic-token-canary", GITHUB_TOKEN="")
         entry_point = Path(sys.executable).parent / (
             "ghorgsec.exe" if os.name == "nt" else "ghorgsec"
         )
@@ -92,6 +94,14 @@ def main() -> None:
         assert result.returncode == 2 and b"Error:" in result.stderr
         conflict = invoke("report", "--fixture", str(fixture), "--org", "another-org")
         assert conflict.returncode == 2
+
+        live_conflict = invoke("report", "--live", "--fixture", str(fixture))
+        assert live_conflict.returncode == 2 and b"Error:" in live_conflict.stderr
+        assert b"offline CLI attempted network access" not in live_conflict.stderr
+        environment["GH_TOKEN"] = ""
+        missing_token = invoke("report", "--live", "--user", "example")
+        assert missing_token.returncode == 2 and b"token" in missing_token.stderr
+        assert b"offline CLI attempted network access" not in missing_token.stderr
 
         large = root / "large snapshot.json"
         payload = {

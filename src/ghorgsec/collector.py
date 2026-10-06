@@ -30,7 +30,7 @@ def collect_org_security_snapshot(
 
     if allow_network:
         raise RealCollectionDisabledError(
-            "Real GitHub collection is not implemented. Run the offline stub only."
+            "Network is disabled in the offline collector; use the explicit live collector."
         )
 
     repo_names = tuple(_normalize_repository_names(repositories))
@@ -71,4 +71,3 @@ def _stub_repository_controls(repository: str) -> RepositorySecurityControls:
         code_scanning=ControlState.NOT_COLLECTED,
         dependabot_alerts=ControlState.NOT_COLLECTED,
     )
-
