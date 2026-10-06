@@ -1,28 +1,33 @@
 # GitHub Org Security Dashboard
 
-Skeleton read-only para consolidar um painel de controles de seguranca por repositorio em uma organizacao GitHub, com saida em Markdown ou JSON. Inclui sumario de postura e classificacao de risco deterministica por repositorio.
+CLI read-only para consolidar controles de seguranca por repositorio GitHub, com saida
+em Markdown ou JSON, sumario de postura e uma rubrica de risco documentada.
 
 ## Status
 
-Este projeto ainda nao coleta dados reais. O collector atual e offline, nao acessa GitHub, nao exige token e gera relatorios a partir de nomes sinteticos ou fixtures JSON locais. Todo numero exibido (cobertura, score de risco) deriva apenas de entradas locais fornecidas pelo usuario.
+O codigo atual inclui coleta real opcional em `api.github.com`. Sem `--live`, a CLI continua
+offline e usa nomes sinteticos ou fixtures locais, sem ler token. O modo live exige uma
+credencial e consulta somente os repositorios visiveis a ela. O projeto permanece alpha.
+As versoes anteriores a 0.3.0 oferecem apenas os modos offline.
 
 ### Uso e divulgacao
 
-A versao atual pode ser usada para processar fixtures sinteticas e demonstrar os relatorios
-Markdown/JSON, a cobertura de controles e a rubrica de risco. A CI valida Ubuntu com Python
-3.12/3.13 e Windows com Python 3.12. Apresente o projeto como uma CLI offline em fase alpha,
-com relatorios derivados de dados locais.
+A alpha pode gerar relatorios locais e observar controles em uma conta pessoal autenticada
+ou organizacao autorizada. O modo pessoal foi exercitado em uma conta propria, com comparacao
+independente dos controles deste repositorio. O fluxo organizacional tem testes com respostas
+simuladas; uma execucao em organizacao real ainda precisa ser validada.
 
-A coleta de organizacoes reais ainda nao esta implementada. Ela depende de um cliente GitHub,
-permissoes, paginacao, tratamento de rate limit e validacao contra um alvo autorizado, como
-descrito na [evolucao planejada](docs/SPEC.md#evolucao-planejada). Os relatorios atuais nao
-comprovam controles de uma organizacao real nem certificam seguranca ou conformidade.
+A CI cobre Ubuntu/Python 3.12 e 3.13 e Windows/Python 3.12. Divulgue os limites de coleta:
+o inventario depende do token; branch protection cobre a default branch; configuracoes
+avancadas de code scanning podem ficar como `unknown`. O relatorio nao certifica seguranca,
+ausencia de vulnerabilidades ou conformidade. Consulte o [contrato live](docs/LIVE_COLLECTION.md).
 
 ## Escopo atual
 
 - CLI minima com Typer (`report`).
 - Modelo tipado de organizacao, repositorio e controles de seguranca.
 - Collector stub seguro, offline por padrao.
+- Collector live opt-in, com inventario paginado e gaps por controle.
 - Loader de fixture JSON local com validacao de contrato.
 - `visibility` validada contra allowlist (`public`, `private`, `internal`).
 - Sumario de postura: cobertura por controle, com `not_collected` excluido do denominador.
@@ -30,12 +35,12 @@ comprovam controles de uma organizacao real nem certificam seguranca ou conformi
 - Saida em Markdown ou JSON deterministico.
 - Testes unitarios sem chamadas de rede; ruff, mypy estrito e cobertura configurados.
 
-## Fora de escopo por enquanto
+## Limites do produto
 
-- Chamar APIs reais do GitHub.
-- Ler tokens, secrets ou credenciais.
-- Persistir dados coletados de organizacoes reais.
-- Avaliar branch protection, code scanning, secret scanning ou Dependabot com dados reais.
+- Nenhuma alteracao de configuracao de repositorios pela coleta.
+- Sem GitHub Enterprise Server, UI web, banco de dados, agendamento ou telemetria.
+- Sem coleta de conteudo de secrets, alertas ou vulnerabilidades.
+- Sem conclusao de cobertura integral da conta/organizacao ou qualidade de enforcement.
 
 ## Setup
 
@@ -98,11 +103,51 @@ nem suas dependencias. Use a instalacao acima antes de executar os exemplos.
 
 ### Opcoes do comando `report`
 
-- `--org`: nome da organizacao para o relatorio stub (obrigatorio sem `--fixture`; nao combinavel com `--fixture`).
-- `--repo`: nome de repositorio a incluir no stub (repetivel; nao combinavel com `--fixture`).
+- `--org`: organizacao para o stub ou para `--live`; obrigatorio sem `--fixture`/`--user`.
+- `--user`: conta pessoal autenticada, apenas com `--live`; nao combinavel com `--org`.
+- `--live`: habilita leituras na API GitHub usando `GH_TOKEN` ou `GITHUB_TOKEN`.
+- `--repo`: nome repetivel; no stub inclui nomes, no live filtra o inventario visivel ao token.
 - `--fixture`: fixture JSON local a renderizar.
 - `--format`: `md` (padrao) ou `json`.
 - `--output` / `-o`: caminho de saida local opcional.
+
+`--fixture` nao aceita `--org`, `--repo`, `--user` ou `--live`. Codigo de saida 0 indica
+relatorio gerado, mesmo com controles `unknown`; nao funciona como gate de seguranca.
+Erros de entrada, autenticacao, coleta ou arquivo retornam `Error:` e codigo 2.
+
+### Coleta real
+
+Use apenas alvos proprios ou autorizados. Disponibilize um token por `GH_TOKEN` ou
+`GITHUB_TOKEN`; `GH_TOKEN` nao vazio tem precedencia. O token nao e parametro da CLI,
+nao e salvo no relatorio e so e lido com `--live`.
+
+Se o GitHub CLI ja estiver autenticado, no PowerShell:
+
+```powershell
+$env:GH_TOKEN = gh auth token --hostname github.com
+ghorgsec report --live --user SEU_LOGIN --format json -o pessoal.json
+Remove-Item Env:GH_TOKEN
+```
+
+Substitua `SEU_LOGIN` pelo login correspondente ao token. O modo pessoal usa o inventario
+autenticado, incluindo os repositorios privados visiveis a credencial. Sem `--repo`,
+coleta todos os repositorios desse inventario dentro dos limites documentados.
+
+Para filtrar repositorios de uma organizacao autorizada:
+
+```bash
+ghorgsec report --live --org example-org --repo api --repo web -o postura.md
+```
+
+Uma credencial fine-grained pode usar permissoes de repositorio `Metadata: read`,
+`Contents: read` e `Administration: read`, nos repositorios selecionados. Permissoes,
+papel do usuario e disponibilidade dos recursos afetam os campos retornados. Quando
+a API omite um controle ou recusa acesso, o relatorio preserva `unknown`.
+O [contrato live](docs/LIVE_COLLECTION.md) relaciona cada endpoint, estado e limite.
+
+Relatorios reais podem conter nomes de repositorios privados e sua postura. Escolha
+um destino local adequado e revise o conteudo antes de compartilhar. Nao use esses
+relatorios como fixtures publicas.
 
 ## Fixture JSON
 
@@ -168,7 +213,8 @@ Cada repositorio recebe uma classificacao deterministica a partir dos controles 
 - `disabled` -> 2 pontos; `unknown` -> 1 ponto; `enabled` -> 0; `not_collected` -> excluido.
 - Faixas sobre os controles avaliados: score 0 -> `strong`; 1-2 -> `moderate`; >= 3 -> `weak`; nenhum avaliado -> `not_assessed`.
 
-E uma ajuda de transparencia para o skeleton, nao uma avaliacao de risco real: nunca inventa dados.
+Essa rubrica resume os estados observados ou fornecidos. Ela nao mede explorabilidade,
+impacto de vulnerabilidades ou qualidade dos controles.
 
 Cada linha de risco mostra a quantidade de controles nao coletados e `assessment_status`:
 `complete`, `partial` ou `not_assessed`. Uma classificacao `strong` em uma avaliacao `partial`

@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ghorgsec"
-version = "0.2.0"
-description = "Read-only GitHub organization security dashboard skeleton."
+version = "0.3.0"
+description = "Read-only GitHub repository security reports, offline by default."
 readme = "README.md"
 requires-python = ">=3.12"
 license = "Apache-2.0"

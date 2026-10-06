@@ -2,7 +2,8 @@
 
 ## Objetivo
 
-Criar uma base Python 3.12 para um dashboard read-only de postura de seguranca de repositorios GitHub em nivel organizacional, com saida inicial em Markdown.
+Fornecer uma CLI Python 3.12 read-only para postura de repositorios GitHub de organizacao
+ou conta pessoal autenticada, com saida Markdown e JSON e coleta offline por padrao.
 
 ## Requisitos
 
@@ -12,21 +13,28 @@ Criar uma base Python 3.12 para um dashboard read-only de postura de seguranca d
 - Carregar snapshots simulados a partir de fixtures JSON locais, com validacao de contrato.
 - Derivar sumario de postura e classificacao de risco por repositorio de forma deterministica.
 - Manter o collector offline/stub por padrao.
-- Nao acessar GitHub real, nao exigir token e nao coletar dados reais nesta fase.
+- Acessar GitHub real somente com `--live`, token explicito por ambiente e alvo autorizado.
+- Exigir token somente no modo live; preservar o collector stub e fixtures sem rede.
+- Isolar transporte GET por interface e tratar paginacao, limites, erros e gaps de acesso.
 - Incluir testes unitarios para o comportamento seguro padrao.
 
 ## Controles Modelados
 
 Cada repositorio expoe:
 
-- default branch, quando informado pela fixture;
-- visibility, quando informada pela fixture, restrita a `public`, `private` ou `internal`;
+- default branch, quando informada pela fonte;
+- visibility, quando informada pela fonte, restrita a `public`, `private` ou `internal`;
 - branch protection;
 - secret scanning;
 - code scanning;
 - Dependabot alerts.
 
 No modo stub, metadados e controles sem coleta real aparecem como `not_collected`, pois nao ha integracao real. No modo fixture, metadados sao lidos de um arquivo JSON local quando presentes, e os controles devem usar estados permitidos pelo modelo: `enabled`, `disabled`, `unknown` ou `not_collected`.
+
+No modo live, o [contrato de coleta](LIVE_COLLECTION.md) define endpoint, permissao,
+limite, estado e erro por controle. A lista contem apenas repositorios visiveis ao token.
+`github_live_user` usa a conta autenticada; `github_live_org` usa uma organizacao.
+O campo JSON `organization` continua contendo o owner, preservando o schema existente.
 
 ## Saida e Agregacao
 
@@ -60,10 +68,12 @@ O `collection_mode` do snapshot carregado por fixture e sempre `fixture_json`, i
 
 ## Decisoes de Seguranca
 
-- A CLI e offline. A mesma fixture produz a mesma saida; o stub registra a hora corrente.
+- A CLI e offline por padrao. A mesma fixture produz a mesma saida; o stub registra a hora corrente.
 - A CLI nao possui parametro de token.
-- Qualquer tentativa programatica de habilitar rede no collector falha explicitamente.
-- Relatorios sao derivados apenas de entradas fornecidas localmente pelo usuario.
+- O collector stub antigo continua recusando `allow_network=True`; o collector live e separado.
+- Cliente live: GET HTTPS em api.github.com, sem redirects, sem token nos erros/relatorios.
+- A autenticacao pessoal confere o owner; controle inacessivel permanece `unknown`.
+- Limites e falhas de inventario impedem um relatorio live silenciosamente truncado.
 - Erros de leitura, parsing e validacao de fixtures reportam `Error: ...` e saem com codigo 2.
 - Erros de gravacao reportam `Error: ...` e saem com codigo 2. A saida nao pode sobrescrever a fixture de entrada, inclusive por hard link ou caminho resolvido.
 - A saida para stdout usa UTF-8 mesmo quando o console nao consegue codificar o conteudo, para que nomes de repositorio nunca sejam mutilados em silencio.
@@ -74,17 +84,21 @@ O `collection_mode` do snapshot carregado por fixture e sempre `fixture_json`, i
 - `python -m coverage run -m pytest` passa (com `pythonpath=src` via configuracao).
 - `python -m ruff check .` e `python -m mypy` (estrito) passam.
 - `python -m build` gera sdist e wheel; o wheel inclui `py.typed`.
-- A CLI e os testes unitarios nao chamam GitHub, internet ou API externa. Clone, instalacao,
-  build e auditoria de dependencias podem acessar servicos externos; nao sao operacoes offline.
+- A CLI sem `--live` e os testes automatizados nao chamam APIs externas. Clone, instalacao,
+  build, auditoria de dependencias e uso `--live` podem acessar servicos externos.
 - `ghorgsec report --fixture examples/org-security-snapshot.json` gera Markdown a partir de dados sinteticos locais.
 - `ghorgsec report --fixture examples/org-security-snapshot.json --format json` gera JSON valido e deterministico.
 - O README documenta claramente as limitacoes e o modo seguro atual.
+- O modo live pessoal e exercitado em conta autorizada e comparado com leituras independentes.
+- Testes de contrato cobrem organizacao, conta, filtros, paginacao, origin/redirect,
+  autenticacao, redacao, rate limits, limites de recursos e gaps de controles.
 - A CI valida Ubuntu/Python 3.12 e 3.13 e Windows/Python 3.12, alem de build, auditoria de dependencias e uso do wheel instalado sem rede.
 - O check protegido `Lint, type-check, test` so passa quando todas as combinacoes e o job de pacote passam.
 
 ## Evolucao Planejada
 
-- Adicionar cliente GitHub read-only isolado por interface.
-- Exigir token apenas quando uma coleta real for implementada e explicitamente solicitada.
-- Cobrir rate limit, paginacao, erros de autorizacao e redacao de dados sensiveis.
-- Expandir relatorios para severidade, evidencias e gaps por controle.
+- Validar E2E em uma organizacao real autorizada; o fluxo tem testes sinteticos atualmente.
+- Ampliar evidencia de code scanning avancado sem confundir historico de analises com
+  configuracao atual ou enforcement.
+- Qualquer ampliacao de formatos ou severidade exige necessidade demonstrada e criterios
+  de aceite; os quatro controles, estados e rubricagem atuais permanecem o limite desta fase.

@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-This project is in alpha. Security fixes target the `0.2.x` release series and
+This project is in alpha. Security fixes target the `0.3.x` release series and
 the current `main` development line.
 
 ## Reporting a Vulnerability
@@ -12,16 +12,26 @@ enabled on this repository: open the Security tab and choose "Report a
 vulnerability". Reports are handled privately through GitHub security advisories.
 
 Include the affected version or commit, reproduction steps, and expected
-impact. A minimal fixture that triggers the behaviour is the most useful thing
-you can attach, since the tool is offline and takes its input from a local
-file.
+impact. For offline parsing issues, include a minimal synthetic fixture. For live
+collection issues, include sanitized HTTP status codes and synthetic response data.
 
 Do not include GitHub tokens, private repository names, organization secrets,
 customer data, or sensitive audit exports in public issues.
 
 ## Data Handling
 
-The current collector is offline-only and does not call the GitHub API. Any
-future live collector must require an explicit token, use read-only scopes,
-redact sensitive values, and be testable without network access.
+Offline reports do not read credentials or call GitHub. Explicit `--live` uses
+`GH_TOKEN` or `GITHUB_TOKEN` for GET requests to `api.github.com` only. Redirects
+are refused. Tokens and response bodies are excluded from reports and errors.
+The collector reads repository metadata and control settings, not secret values
+or vulnerability alert contents. It does not change repository configuration.
 
+Live reports can contain private repository names and control posture. Keep them
+in an appropriate local destination and review them before sharing. No reports
+are uploaded or cached by the tool. Credential privileges and the system TLS
+trust store remain part of the operator's environment. Prefer a token restricted
+to the intended repositories with the documented read permissions.
+
+See [the live collection contract](docs/LIVE_COLLECTION.md) for API sources,
+limits, permission gaps and incomplete coverage. An enabled setting does not
+establish enforcement quality or absence of vulnerabilities.

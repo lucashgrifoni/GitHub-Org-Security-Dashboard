@@ -1,5 +1,6 @@
 """Typer CLI for the read-only GitHub organization security dashboard."""
 
+import os
 import sys
 from enum import StrEnum
 from pathlib import Path
@@ -9,6 +10,8 @@ import typer
 
 from ghorgsec.collector import collect_org_security_snapshot
 from ghorgsec.fixture_loader import FixtureLoadError, load_snapshot_fixture
+from ghorgsec.github_client import GitHubClient, GitHubCollectionError
+from ghorgsec.live_collector import collect_live_snapshot
 from ghorgsec.models import OrgSecuritySnapshot
 from ghorgsec.report import render_markdown_report
 from ghorgsec.serialize import render_json_report
@@ -24,25 +27,26 @@ class OutputFormat(StrEnum):
 
 
 app = typer.Typer(
-    help="Generate offline GitHub organization security dashboard reports.",
+    help="Generate GitHub security reports. Offline by default; live reads require --live.",
     no_args_is_help=True,
+    pretty_exceptions_show_locals=False,
 )
 
 
 @app.callback()
 def main() -> None:
-    """Generate offline GitHub organization security dashboard reports."""
+    """Generate GitHub security reports with an explicit read-only live mode."""
 
 
 @app.command()
 def report(
     org: Annotated[
         str | None,
-        typer.Option("--org", help="Organization name for the local stub report."),
+        typer.Option("--org", help="Organization name for a stub or explicit live report."),
     ] = None,
     repo: Annotated[
         list[str] | None,
-        typer.Option("--repo", help="Repository name to include in the stub snapshot."),
+        typer.Option("--repo", help="Repository name to include; repeat to select repositories."),
     ] = None,
     fixture: Annotated[
         Path | None,
@@ -63,16 +67,39 @@ def report(
         Path | None,
         typer.Option("--output", "-o", help="Optional local output path."),
     ] = None,
+    live: Annotated[
+        bool,
+        typer.Option("--live", help="Read GitHub using GH_TOKEN or GITHUB_TOKEN (GET only)."),
+    ] = False,
+    user: Annotated[
+        str | None,
+        typer.Option("--user", help="Authenticated personal account; requires --live."),
+    ] = None,
 ) -> None:
-    """Render a Markdown or JSON report from local stub input or a JSON fixture."""
+    """Render local input, or explicitly collect token-visible GitHub controls."""
 
-    snapshot = (
-        _load_fixture_snapshot(fixture, org, repo)
-        if fixture is not None
-        else collect_org_security_snapshot(
-            org=_require_org(org), repositories=repo or []
-        )
-    )
+    if fixture is not None and (live or user is not None):
+        _fail("--live and --user cannot be combined with --fixture.")
+    if user is not None and not live:
+        _fail("--user requires --live; offline reports use --org or --fixture.")
+    if user is not None and org is not None:
+        _fail("Choose either --org or --user, not both.")
+    if live:
+        owner = user if user is not None else _require_org(org)
+        try:
+            token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN", "")
+            snapshot = collect_live_snapshot(
+                owner,
+                client=GitHubClient(token),
+                personal=user is not None,
+                repositories=repo or [],
+            )
+        except GitHubCollectionError as error:
+            _fail(str(error))
+    elif fixture is not None:
+        snapshot = _load_fixture_snapshot(fixture, org, repo)
+    else:
+        snapshot = collect_org_security_snapshot(org=_require_org(org), repositories=repo or [])
     rendered = _render(snapshot, output_format).rstrip(NEWLINE) + NEWLINE
 
     if output is None:
@@ -81,8 +108,7 @@ def report(
 
     try:
         if fixture is not None and (
-            output.resolve() == fixture.resolve()
-            or (output.exists() and output.samefile(fixture))
+            output.resolve() == fixture.resolve() or (output.exists() and output.samefile(fixture))
         ):
             _fail("--output must not overwrite the input fixture; choose another path.")
 

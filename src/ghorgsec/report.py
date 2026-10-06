@@ -14,10 +14,13 @@ _CONTROL_CHARACTERS = dict.fromkeys([*range(0x20), 0x7F], " ")
 def render_markdown_report(snapshot: OrgSecuritySnapshot) -> str:
     """Render a basic Markdown dashboard report."""
 
+    owner_label = (
+        "Personal account" if snapshot.collection_mode == "github_live_user" else "Organization"
+    )
     lines = [
         "# GitHub Org Security Dashboard",
         "",
-        f"- Organization: `{_escape_inline(snapshot.organization)}`",
+        f"- {owner_label}: `{_escape_inline(snapshot.organization)}`",
         f"- Collection mode: `{_escape_inline(snapshot.collection_mode)}`",
         f"- Generated at: `{snapshot.generated_at.isoformat()}`",
         "",

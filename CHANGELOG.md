@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 0.3.0 - 2026-10-06
+
+- Added explicit `--live` collection for organizations and the authenticated personal
+  account (`--user`), with optional repository filters. Offline use remains the default.
+- Added a GET-only GitHub REST client, strict origin checks, refused redirects, validated
+  Link pagination, request/read/response budgets, rate-limit handling and sanitized errors.
+- Read credentials from `GH_TOKEN` or `GITHUB_TOKEN` only in live mode; no CLI token option.
+- Collected default-branch protection, explicit secret-scanning configuration, code-scanning
+  default setup and confirmed Dependabot-alert enablement. Inaccessible or ambiguous
+  responses remain `unknown`, with repository-specific warnings.
+- Preserved report schemas and the old offline collector API. Live personal reports use
+  `github_live_user`; the existing JSON `organization` key contains the requested owner.
+- Added network-free contract and abuse tests and documented API sources, permissions,
+  data handling and limitations. Advanced code-scanning setup remains indeterminate.
+- Added tag-triggered release builds with installed-wheel checks, runtime audit/SBOM
+  and GitHub artifact attestations. Published packages are verified against their
+  repository, workflow, source revision, tag and digest before publication.
+
 - Clarified alpha readiness for offline reports and the planned live-collection work.
 - Corrected module usage prerequisites: setting `PYTHONPATH=src` does not install Typer.
 - Limited the offline guarantee to CLI use and unit tests; installation, builds and
