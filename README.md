@@ -234,7 +234,7 @@ python scripts/audit_environment.py
 
 CI (`.github/workflows/ci.yml`) executa lint, type-check estrito e testes com cobertura, com actions pinadas por commit SHA e permissoes minimas.
 
-O uso da CLI e os testes unitarios sao offline. Clonar, instalar, preparar o build e auditar
+O uso da CLI sem `--live` e os testes automatizados sao offline. Clonar, instalar, preparar o build e auditar
 dependencias podem acessar GitHub, o indice de pacotes e o servico de advisories. O modo
 offline da CLI nao abrange essas etapas de preparacao e validacao.
 
@@ -243,12 +243,31 @@ audita dependencias, gera wheel e sdist e exercita o wheel instalado em um ambie
 com a rede bloqueada durante o uso da CLI. O check obrigatorio `Lint, type-check, test` depende
 de todos esses jobs. CodeQL usa o conjunto `security-extended` em um workflow separado.
 
+### Verificar artefatos de release
+
+O workflow de release gera wheel, sdist e um SBOM do runtime resolvido em Ubuntu/Python
+3.12. As attestations vinculam os pacotes a esse build e ao SBOM. O SBOM descreve esse
+ambiente; dependencias condicionais de outros sistemas podem ser diferentes. Uma
+attestation valida confirma origem e integridade, sem certificar seguranca do codigo.
+
+Depois de baixar o wheel de 0.3.0, verifique sua origem com o GitHub CLI:
+
+```bash
+gh attestation verify ghorgsec-0.3.0-py3-none-any.whl --repo lucashgrifoni/GitHub-Org-Security-Dashboard --signer-workflow lucashgrifoni/GitHub-Org-Security-Dashboard/.github/workflows/release.yml --source-ref refs/tags/v0.3.0 --deny-self-hosted-runners
+```
+
+O manifesto de evidencias da release informa a revisao do fonte e os digests. A verificacao
+de publicacao tambem exige que a revisao corresponda ao build. Consulte a [documentacao
+de attestations do GitHub](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations).
+
 ## Estrutura
 
 - `docs/SPEC.md`: especificacao tecnica curta.
 - `examples/org-security-snapshot.json`: fixture local sintetica.
 - `src/ghorgsec/models.py`: dataclasses e enums do dominio.
 - `src/ghorgsec/collector.py`: collector offline/stub.
+- `src/ghorgsec/github_client.py`: transporte GET, origem e limites da API.
+- `src/ghorgsec/live_collector.py`: inventario e estados de controles reais.
 - `src/ghorgsec/fixture_loader.py`: loader de snapshot a partir de JSON local.
 - `src/ghorgsec/summary.py`: agregacao de postura.
 - `src/ghorgsec/risk.py`: classificacao de risco deterministica.
