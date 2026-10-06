@@ -1,6 +1,7 @@
 name: Release artifacts
 
 on:
+  workflow_dispatch:
   push:
     tags: ["v*"]
 
@@ -10,6 +11,7 @@ permissions:
 jobs:
   build:
     name: Build and attest release packages
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -32,14 +34,15 @@ jobs:
 
       - name: Verify release source and version
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_REF: ${{ github.ref }}
         run: |
           git merge-base --is-ancestor HEAD origin/main
           python - <<'PY'
           import os, tomllib
           from pathlib import Path
           version = tomllib.loads(Path('pyproject.toml').read_text())['project']['version']
-          if os.environ['RELEASE_TAG'] != 'v' + version:
+          ref = os.environ['RELEASE_REF']
+          if ref.startswith('refs/tags/') and ref != 'refs/tags/v' + version:
               raise SystemExit('Release tag does not match the package version')
           PY
 
