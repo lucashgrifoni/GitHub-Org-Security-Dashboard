@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:a30c8d480f58f94a9e378058f184c4bc795609ac4514855d3f2ae5ff956ff9b4",
+  "claims": [
+    {
+      "id": "claim_a068d27e911a464ba9e70d3823c81010",
+      "statement": "Coverage excludes not_collected, includes unknown, uses integer-floor enabled/assessed percentage and returns zero for an empty assessed denominator.",
+      "evidence": [
+        {
+          "resource": "repo://src/ghorgsec/summary.py#L14-L61",
+          "version": "repo-lines-v1:sha256:130e631795f932649a125262082daedc2aa01380debe14e31e81fbfd6ded902e:eyJzZWxlY3RlZExpbmVDb3VudCI6NDgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVmM2VjZmM3ODVkNmU2OWIzMTI0NDQ0MzQ2NjJhNTU0NjJlOGZlZTkzYzg5NzIzNjg0ZDQ0ODQ5MTFjNDJhMGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYzNjc5NDg1NjA0OTE4NDViMzhlZTY3MDczOTE2YTk2OWRhYjJmMDdiMmUxMzkyMjk0ZDg1M2RlNzgxY2IwZGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk4MzAyNDE1MzJlZGE4NDkwMDk2YWE3OTBhOTNhNTUwZjMyNDAwMzcyNGE2MjU4YzBkMDlmMTg4ZGVkMWE0NWYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9690a594369141bc86598915ef8a67ac",
+      "statement": "The rubric assigns disabled=2, unknown=1 and enabled=0, excludes not_collected and has separate not-assessed/partial/complete collection semantics.",
+      "evidence": [
+        {
+          "resource": "repo://src/ghorgsec/risk.py",
+          "version": "repo-file-v1:sha256:c3b5350a5a36691412405ea9ce5a5e096f29dc541876ae55a4dc8802793d555f"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T19:10:41.356Z"
+  }
+}
