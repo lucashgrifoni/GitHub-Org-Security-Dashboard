@@ -2,25 +2,25 @@
   "schemaVersion": 1,
   "pages": {
     "/openwiki/architecture/collection-and-report.md": {
-      "gitHead": "f7cc4c1ca3b9a9fc07ad553a254eda07573cc14d",
-      "sourceFingerprint": "sha256:02aef116e902c28115e8754f30435bac7409c47dd05e242a742bc6e27ad9ec3d",
       "pageVersion": "sha256:4c99881ccef2a4e6f92ced46fa15dc0d35cf704974da60f92aa06683c6c13ff7",
       "completedBy": "codex",
-      "completedRunId": "0041d85f-e936-49b9-a58f-59bba4a43d3f"
+      "completedRunId": "0041d85f-e936-49b9-a58f-59bba4a43d3f",
+      "gitHead": "8db8892aa69a462b08531a5d44c3bc94e1d11eb6",
+      "sourceFingerprint": "sha256:f5f9e3eca3f195d73ee657ff940eddfd4f2adf1522ba7be3ed10724707f4e5ff"
     },
     "/openwiki/concepts/posture-semantics.md": {
-      "gitHead": "f7cc4c1ca3b9a9fc07ad553a254eda07573cc14d",
-      "sourceFingerprint": "sha256:02aef116e902c28115e8754f30435bac7409c47dd05e242a742bc6e27ad9ec3d",
       "pageVersion": "sha256:a30c8d480f58f94a9e378058f184c4bc795609ac4514855d3f2ae5ff956ff9b4",
       "completedBy": "codex",
-      "completedRunId": "0041d85f-e936-49b9-a58f-59bba4a43d3f"
+      "completedRunId": "0041d85f-e936-49b9-a58f-59bba4a43d3f",
+      "gitHead": "8db8892aa69a462b08531a5d44c3bc94e1d11eb6",
+      "sourceFingerprint": "sha256:f5f9e3eca3f195d73ee657ff940eddfd4f2adf1522ba7be3ed10724707f4e5ff"
     },
     "/openwiki/quickstart.md": {
-      "gitHead": "f7cc4c1ca3b9a9fc07ad553a254eda07573cc14d",
-      "sourceFingerprint": "sha256:02aef116e902c28115e8754f30435bac7409c47dd05e242a742bc6e27ad9ec3d",
       "pageVersion": "sha256:8d148e0ca54b0128f7af6c399c1a8c9b3ccd3af82a7d01c5512027e3b33028f0",
       "completedBy": "codex",
-      "completedRunId": "0041d85f-e936-49b9-a58f-59bba4a43d3f"
+      "completedRunId": "0041d85f-e936-49b9-a58f-59bba4a43d3f",
+      "gitHead": "8db8892aa69a462b08531a5d44c3bc94e1d11eb6",
+      "sourceFingerprint": "sha256:f5f9e3eca3f195d73ee657ff940eddfd4f2adf1522ba7be3ed10724707f4e5ff"
     }
   }
 }
