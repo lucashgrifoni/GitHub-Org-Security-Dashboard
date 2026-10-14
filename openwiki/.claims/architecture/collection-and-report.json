@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:4c99881ccef2a4e6f92ced46fa15dc0d35cf704974da60f92aa06683c6c13ff7",
+  "claims": [
+    {
+      "id": "claim_ff33be8d0ca34f688194f4a27a29a378",
+      "statement": "The live inventory verifies owner identity and rejects a requested repository absent from token-visible inventory.",
+      "evidence": [
+        {
+          "resource": "repo://src/ghorgsec/live_collector.py#L18-L78",
+          "version": "repo-lines-v1:sha256:2b83394d14f944c80d6cf06d8133f8d30036cb587777e955caed51eb57653dbe:eyJzZWxlY3RlZExpbmVDb3VudCI6NjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFiYjBhNGY4ZjlmNzMxNjUwNmM5N2RmNWM3YTY2MzVjYmY4MDcyYTI0YzVmZWNiM2UxY2E2NWE4YzQwNDk5NzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5OGIwNjNkOWI0N2U2NTM3OTYyNTU3MmNjZTE5NzY2OWQ1NzY3ZTEyYzE4YmUwNzU2NTJiOGNkOTgxY2U4ZDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY1MzY1OTA4MGYzNGZmYjI4MTg4NjE5ZmQ0OWI0NGNmZmUyYWY3NDEwOWQ1NDYzYWUyNTk1MWQ2MWE3Yzk5ZDYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_91704ea47dc44363975a058c613c2294",
+      "statement": "The GitHub client uses GET-only transport, a fixed HTTPS API origin, refused redirects and bounded collection budgets.",
+      "evidence": [
+        {
+          "resource": "repo://src/ghorgsec/github_client.py",
+          "version": "repo-file-v1:sha256:ca17c9e2371810450ab6e7b2493998c992bb7b78ac8cc9663e8510cb1a0fb049"
+        }
+      ]
+    },
+    {
+      "id": "claim_b8d262443bba4e159635f6cbb954a623",
+      "statement": "The CLI protects the fixture from output overwrite and writes UTF-8/LF report text.",
+      "evidence": [
+        {
+          "resource": "repo://src/ghorgsec/cli.py#L116-L166",
+          "version": "repo-lines-v1:sha256:a0829faff1591852c7fd7d0be3ffe68460e6c7317f69fe777848610602f7f47e:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1YzE3YjJjMDNhN2ZhNWE5Yzg2NzFmMTZlZDZlMWU1MDY2ZGQ2MWZkMjU5ZGEzMDAwNjdiNjFkNTcyNWQwOWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkYTVjNjZlMTdiMTQ1Mzk3ODM0YjhjODU0ZGM0MTkzZTIxMjUxODBhODk5NmExNGMzMTg4MzMyNmIyZWZiY2YiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxYTYwMTJkMjY0MmM1OTUxZTczZWNlMjZmMjY2OWVjOGUxOTRhZmE4M2ZkMWYzNWQwNzRmNTc4OWI5NWJkMmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA2ZGNmNzE0YmE0ZjI2MjVjZDA4YjBjMThkNmRkZDhjNzcyMzg2MWE3ZTkwM2UxNWVlN2MzYmRkZGMzNjIzZDIifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T19:10:41.356Z"
+  }
+}

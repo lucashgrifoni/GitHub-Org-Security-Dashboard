@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:8d148e0ca54b0128f7af6c399c1a8c9b3ccd3af82a7d01c5512027e3b33028f0",
+  "claims": [
+    {
+      "id": "claim_24a0f5ca1a54499c8e7d1c6fa12f04b8",
+      "statement": "The CLI uses synthetic or fixture inputs by default and reads token environment variables only for explicit live collection.",
+      "evidence": [
+        {
+          "resource": "repo://src/ghorgsec/cli.py#L79-L116",
+          "version": "repo-lines-v1:sha256:bacb538540dff7c5d693e0da6d879c00cae3b3634dea9a0302174cc4fbb04422:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4MzBkYTJkMzZhY2IzMGY5NjNmMzk4NzEzNTg5MDk4MGQ4Yjk1ZmI2YWYzZjU2MTI0YjhiZjZhYzRhNGJiMTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1YzE3YjJjMDNhN2ZhNWE5Yzg2NzFmMTZlZDZlMWU1MDY2ZGQ2MWZkMjU5ZGEzMDAwNjdiNjFkNTcyNWQwOWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI5ODRiNzY5ZjRjYzcwOTAyMjVkZDgyZGJlNTFhOTg0YWEyYjlhNDlhNjA2ODcyMWNkNjQ4YzEzMmUzNDBiZDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE5YTYyYWU2NzlmYTgyMzk5NjAxOTc4NzUxMGFhODU5MzlkZDIxMGU1MGVhYjYxMGQzMjg5MzFiZDk1MTRhZjEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_58ee84cf3add42c593aba50c2a3752f7",
+      "statement": "Live collection records token-visible and sequential-observation limits and default-branch protection boundaries.",
+      "evidence": [
+        {
+          "resource": "repo://src/ghorgsec/live_collector.py#L55-L78",
+          "version": "repo-lines-v1:sha256:575d6212635188b0eac43d24b4a6b469ee662f0acde9ffde209f01dd8b2d0ae5:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMyZWMxMmIwZWRjZjFlZWFlMTkwMDNkZjI0NDE4MzIwYWYzNjczMTI0M2Q3YzFkMzI5M2JkNTJiOTU0ZDMzMDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY1MzY1OTA4MGYzNGZmYjI4MTg4NjE5ZmQ0OWI0NGNmZmUyYWY3NDEwOWQ1NDYzYWUyNTk1MWQ2MWE3Yzk5ZDYifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T19:10:41.356Z"
+  }
+}

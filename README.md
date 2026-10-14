@@ -281,3 +281,7 @@ de attestations do GitHub](https://docs.github.com/en/actions/how-tos/secure-you
 - `tests/`: testes unitarios.
 - `scripts/smoke_installed.py`: validacao do wheel instalado fora da arvore de fontes.
 - `scripts/audit_environment.py`: auditoria das versoes instaladas, incluindo dependencias transitivas.
+
+## Repository wiki
+
+[Source-linked repository guide](openwiki/quickstart.md) · [OpenWiki setup and maintenance](docs/openwiki.md).
