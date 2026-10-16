@@ -1,47 +1,49 @@
-# Piloto de higiene de segredos
+# Higiene de segredos na CI
 
-A CI deste repositório executa Gitleaks 8.30.1 no histórico Git e entrega o
-relatório redigido ao secguard 0.4.0. O piloto observa a decisão em `high`;
-achados aparecem nos relatórios e no resumo da execução. Nesta fase, um BLOCK
-por finding é informativo. Falha do scanner, erro de processamento e ausência
-de decisão válida fazem o job falhar.
+O workflow [secrets-hygiene.yml](../.github/workflows/secrets-hygiene.yml) executa
+Gitleaks 8.30.1 no historico Git e entrega o relatorio redigido ao secguard 0.4.0.
+O job `Secrets hygiene gate` falha com achados ativos a partir de high, falha do
+scanner, erro de processamento ou ausencia de decisao valida. Um resultado BLOCK
+nao e convertido em sucesso.
 
-O workflow fica em [secrets-hygiene.yml](../.github/workflows/secrets-hygiene.yml).
-O scanner tem versão e checksum fixados; o action usa um commit completo.
-A configuração estende as regras padrão do Gitleaks e desativa exclusões locais
-e comentários de allow. A coleta termina antes de o relatório ser avaliado.
+A observacao do piloto foi revista antes da promocao: a execucao do PR26 em
+2026-10-16 registrou PASS, zero achados ativos e zero dispensas. Isso descreve
+aquela execucao e seu historico disponivel, sem comprovar ausencia universal de
+segredos ou substituir resposta a um eventual incidente.
 
-A execução também cria um exemplo fictício local para verificar BLOCK, PASS,
-erro operacional do scanner e erro de processamento do secguard. Os valores
-fictícios são construídos durante o job e nunca usados para autenticação.
-Somente os exports normalizados são anexados; o relatório bruto do scanner
-permanece temporário.
+## Fontes e retencao
 
-## Revisão do piloto
+O scanner tem versao e checksum fixados; o action usa um commit completo. A
+configuracao estende as regras padrao do Gitleaks e desativa exclusoes locais e
+comentarios de allow. A coleta termina antes da avaliacao. Exports normalizados
+sao retidos mesmo quando o gate falha; dados brutos ficam temporarios no runner.
 
-Abra a execução **Secrets hygiene pilot** e confira:
+Os testes controlados constroem um exemplo ficticio durante o job para verificar
+BLOCK, PASS, erro operacional e erro de processamento. Esses valores nao sao
+credenciais de autenticacao. Testar o exit esperado do avaliador e diferente de
+afirmar que o historico real esta livre de qualquer segredo.
 
-1. O scanner terminou sem erro e gerou um relatório desta execução.
-2. O resumo identifica o modo de relatório e a decisão PASS ou BLOCK.
-3. O teste controlado registrou exits 1, 0 e 2 para os casos esperados.
-4. Os artefatos normalizados permitem revisar achados e orientação de resposta.
+## Protecao de merge
 
-A ausência de achados descreve a execução desse scanner e o histórico disponível.
-Ela não comprova ausência universal de segredos. Antes de tornar a decisão um
-bloqueio obrigatório de merge, revise os resultados e eventuais exceções com
-validade. O piloto é um check adicional; as proteções atuais de main continuam
-exigindo os checks de qualidade e CodeQL.
+O check `Secrets hygiene gate` deve ser obrigatorio em main, junto de
+`Lint, type-check, test` e `CodeQL analyze`, com atualizacao obrigatoria da branch
+e protecao tambem para administradores. A configuracao efetiva fica no GitHub;
+o YAML sozinho nao comprova que a protecao de branch esta ativa.
 
-A CLI ghorgsec mantém seu contrato de processar fixtures locais. Este piloto
-pertence à CI do código-fonte do projeto; nenhuma coleta de organização foi
-adicionada ao produto.
+Qualquer excecao a um finding exige classificacao, justificativa, owner e validade
+antes de uma alteracao revisada da politica. Nao ha dispensas configuradas nesta
+entrega. Erros operacionais e ausencia de relatorio nao admitem conversao em PASS.
+Uma correcao nao deve esconder o alerta nem enfraquecer o scanner para obter verde.
 
-## Recuperação
+Este controle verifica o codigo-fonte do projeto. A CLI continua produzindo
+relatorios de postura e nao passa a coletar conteudo de segredos dos alvos.
 
-Se a integração precisar ser retirada, reverta a PR do piloto. Não use um
-relatório antigo para substituir uma execução que falhou e não transforme ERROR
-ou NO-REPORTS em PASS. A release imutável 0.4.0 do Kit permanece disponível.
+## Recuperacao
 
-Referências: [Secrets Hygiene Kit](https://github.com/lucashgrifoni/secrets-hygiene-kit),
+Preserve os relatorios e investigue a causa de uma falha. Nao substitua a evidencia
+por uma execucao antiga. Uma reversao exige nova alteracao revisada e deve manter
+os demais checks obrigatorios e a trilha de decisao.
+
+Referencias: [Secrets Hygiene Kit](https://github.com/lucashgrifoni/secrets-hygiene-kit),
 [Gitleaks 8.30.1](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1) e
 [uso seguro de GitHub Actions](https://docs.github.com/en/actions/reference/security/secure-use).

@@ -5,13 +5,15 @@ description: Understand frozen Python inputs, installed-wheel qualification and 
 tags: [build, inventory, supply-chain]
 verified:
   - by: openwiki/0.7.2
-    at: 2026-10-16T15:30:15.076Z
+    at: 2026-10-16T16:05:30.374Z
 sources:
   - id: openwiki-source-164e2da859b5277df81c7d94
     resource: repo://.github/workflows/ci.yml
+  - id: openwiki-source-755c44321da69ed14de0f8d4
+    resource: repo://.github/workflows/secrets-hygiene.yml
   - id: openwiki-source-c9cd1e222fe54637129c8ea3
     resource: repo://scripts/build_sbom.py
-generated: { by: "codex", at: "2026-10-16T15:30:15.076Z" }
+generated: { by: "codex", at: "2026-10-16T16:05:30.374Z" }
 ---
 
 # Build and runtime inventory
@@ -37,3 +39,9 @@ Components use declared SPDX expressions when supplied. Legacy license text and 
 Each inventory names its Python/system scope and application archive. Conditional dependencies can differ between platforms. Qualification inventories describe the wheel built in their own lane; they must not be silently rebound to another published archive. Reports can also come from a dry-run, so reports alone do not establish successful installation or use.
 
 The release workflow declares provenance and runtime-SBOM attestations with exact package subjects. Inventory, advisory checks and provenance answer different questions; none certifies application security or legal compliance ([attestation configuration](../../.github/workflows/release.yml)).
+
+## Source repository secrets gate
+
+The secrets workflow scans the repository history and evaluates active findings at high severity. Its job fails on BLOCK, scanner/processing errors or a missing valid decision, and retains normalized reports even on failure. The existing controlled examples exercise PASS, BLOCK and operational error exits. The [gate guide](../../docs/secrets-hygiene-pilot.md) describes exception and recovery boundaries ([workflow](../../.github/workflows/secrets-hygiene.yml)).
+
+Making this check mandatory for merges is a separate GitHub branch-protection setting. The workflow file alone does not prove that setting is active. This source-repository check does not add secret-content collection to the dashboard's target repositories.

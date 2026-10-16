@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 0.4.0 - 2026-10-16
+
 - Rendered fixture HTML and Markdown syntax as literal text in CommonMark reports,
   including warnings and organization names containing backticks.
 - Added next steps for disabled controls and evidence gaps in Markdown and JSON,
@@ -24,6 +26,8 @@ All notable changes to this project will be documented in this file.
 - Added CycloneDX 1.6 runtime inventories with the application, verified archive hashes,
   declared licenses and platform-aware dependency edges. CI qualifies installed wheels
   on every supported matrix lane; release attestations retain their exact subject scope.
+- Promoted the source repository's secrets-hygiene pilot to a failing high-severity gate,
+  retaining reports on failure and preserving controlled PASS/BLOCK/error checks.
 
 ## 0.3.0 - 2026-10-06
 

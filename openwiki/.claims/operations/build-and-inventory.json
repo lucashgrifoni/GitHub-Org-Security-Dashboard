@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:9fb07306fa0b7ff44901a70df251431dacf7c82fd0be89ee673c65102b58fb89",
+  "pageVersion": "sha256:d8655005cf27e0258b2ef0312c88f14d35a30439432b8878d6e8e30009b0a599",
   "claims": [
     {
       "id": "claim_ceaf145a238a462fb35fe5f11a19020c",
@@ -31,10 +31,20 @@
           "version": "repo-lines-v1:sha256:c353e10e6ade25100d2ba50504b2208f23e2a9b061543e76d591195f0a898b44:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYwZmNhZDFjZjk0MTdlNjgxOTcxMDJhOGUyOTk2MjljNWVkNzBkYTQxZjVkN2M2ZjMwYjdjYjlmMzMzMjY0MzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5MWZmNTQyM2ZkNTMyMTVhNzRmM2U1YzNmMmRjMmY3NDkwNzM4ZDJlNWE0MDQ0M2Q3ODUxNWIyODAyOGJlZGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmYmQwMDkzMTRiYzI3MDg0MTY3MzRhMDJhZTVmZjM5YTFlNDhhMDUwYmU5MWY0M2IyZmFhOTIwMDJjNjJiZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU0OGQ3NDgzZDA2MGYxNzIyZTI0NTM2ODg4MzM0MjU2YjU0OTBlOGJiZTg2OTgyMDY3NmNhOWVhZjM1MDljYzkifQ"
         }
       ]
+    },
+    {
+      "id": "claim_13fe471567194d619946cd608c8aeccd",
+      "statement": "The secrets workflow is configured to fail on high-severity BLOCK or invalid/error outcomes and to retain normalized reports even after failure.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/secrets-hygiene.yml",
+          "version": "repo-file-v1:sha256:95e612118708ead7f64cb617a01651c31380feea33d032ff08ab41ab7a18fa11"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-10-16T15:30:15.076Z"
+    "at": "2026-10-16T16:05:30.374Z"
   }
 }
