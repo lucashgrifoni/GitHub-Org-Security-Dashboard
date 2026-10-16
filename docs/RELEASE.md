@@ -75,3 +75,19 @@ uv pip compile pyproject.toml --universal --python-version 3.12 --extra dev --ge
 Referencias: [installation reports do pip](https://pip.pypa.io/en/stable/reference/installation-report/),
 [locking com uv](https://docs.astral.sh/uv/pip/compile/) e
 [CycloneDX](https://cyclonedx.org/specification/overview/).
+
+## Suporte e recuperacao
+
+Lucas Henrique Grifoni mantem o codigo, decide releases e recebe incidentes pelo
+canal privado descrito em [SECURITY.md](../SECURITY.md). Nao ha servico hospedado,
+on-call contratado ou alteracao de configuracao dos alvos. Erros da CLI retornam
+codigo 2 e mensagens sanitizadas; o operador preserva o snapshot e o stderr
+necessarios para reproduzir a falha, sem compartilhar credenciais ou nomes privados.
+
+Se uma versao causar regressao, interrompa seu uso e preserve os outputs em outro
+diretorio. Instale o wheel da release anterior verificada em uma venv separada,
+confira seu hash/atestado e execute primeiro o exemplo sintetico offline. A versao
+0.3.0 nao possui compare nem filtro de fixture; mantenha os snapshots originais
+para retomar a analise depois da correcao. Nao ha migracao de banco nem estado
+remoto para reverter. Corrija a fonte por nova PR com os mesmos checks obrigatorios;
+publique uma nova versao, sem mover tags ou substituir artefatos antigos.

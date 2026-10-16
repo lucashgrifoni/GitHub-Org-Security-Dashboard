@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:d8655005cf27e0258b2ef0312c88f14d35a30439432b8878d6e8e30009b0a599",
+  "pageVersion": "sha256:d54bf19d8d5c4c32cd67ecf015c214e0be2e195587ad43332991b843f8a0f102",
   "claims": [
     {
       "id": "claim_ceaf145a238a462fb35fe5f11a19020c",
@@ -41,10 +41,20 @@
           "version": "repo-file-v1:sha256:95e612118708ead7f64cb617a01651c31380feea33d032ff08ab41ab7a18fa11"
         }
       ]
+    },
+    {
+      "id": "claim_b8361970f33547b28a75300ffece179f",
+      "statement": "The documented recovery procedure preserves outputs, uses a separately installed verified previous wheel, records that version 0.3.0 lacks comparison and fixture filtering, and publishes a new reviewed correction rather than moving existing tags.",
+      "evidence": [
+        {
+          "resource": "repo://docs/RELEASE.md#L87-L93",
+          "version": "repo-lines-v1:sha256:66935dac093e5c6780bb8774bedb8014aa65a68d9ac00c3284dcf62ed0f1c8b0:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTMwYTI4NGRhYmE5Yjg3NDk5ODkyMTA2NjdkOTZlNmU3ZjhjZTIzODRiN2MxYjU2ZWJjMjgwN2Y4ODBiY2Q0MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiY2U4NzFjNmUwMzI0NzI0YzlmYmQ0OTJkMjA5ZjkyMjlmY2I3YjdkMGVjMjVhNGU0NGRiZTY3ZDU1ZWJkYTU4YSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZGM4OGUxYjA0ZGNmNmUzZDE0ZjM5NmExNzEwZjM3NTNkYmUzNDkxM2VhOTcxZWJiZGVjZGZlNTFiNWEzYWI1YSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-10-16T16:05:30.374Z"
+    "at": "2026-10-16T16:15:01.720Z"
   }
 }

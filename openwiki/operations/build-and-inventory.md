@@ -1,19 +1,21 @@
 ---
-type: operations
+type: page
 title: Build and runtime inventory
-description: Understand frozen Python inputs, installed-wheel qualification and platform-scoped dependency evidence.
+description: Understand frozen Python inputs, installed-wheel qualification and runtime inventory boundaries.
 tags: [build, inventory, supply-chain]
 verified:
   - by: openwiki/0.7.2
-    at: 2026-10-16T16:05:30.374Z
+    at: 2026-10-16T16:15:01.720Z
 sources:
   - id: openwiki-source-164e2da859b5277df81c7d94
     resource: repo://.github/workflows/ci.yml
   - id: openwiki-source-755c44321da69ed14de0f8d4
     resource: repo://.github/workflows/secrets-hygiene.yml
+  - id: openwiki-source-774b24653dd5fb423bd74c02
+    resource: repo://docs/RELEASE.md
   - id: openwiki-source-c9cd1e222fe54637129c8ea3
     resource: repo://scripts/build_sbom.py
-generated: { by: "codex", at: "2026-10-16T16:05:30.374Z" }
+generated: { by: "codex", at: "2026-10-16T16:15:01.720Z" }
 ---
 
 # Build and runtime inventory
@@ -45,3 +47,7 @@ The release workflow declares provenance and runtime-SBOM attestations with exac
 The secrets workflow scans the repository history and evaluates active findings at high severity. Its job fails on BLOCK, scanner/processing errors or a missing valid decision, and retains normalized reports even on failure. The existing controlled examples exercise PASS, BLOCK and operational error exits. The [gate guide](../../docs/secrets-hygiene-pilot.md) describes exception and recovery boundaries ([workflow](../../.github/workflows/secrets-hygiene.yml)).
 
 Making this check mandatory for merges is a separate GitHub branch-protection setting. The workflow file alone does not prove that setting is active. This source-repository check does not add secret-content collection to the dashboard's target repositories.
+
+## Recovery
+
+The [maintainer recovery procedure](../../docs/RELEASE.md#suporte-e-recuperacao) preserves existing outputs and uses a separately installed, verified previous wheel. Version 0.3.0 lacks snapshot comparison and fixture filtering. There is no database or remote state to migrate back; a correction goes through a new reviewed version without moving existing tags.

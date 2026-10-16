@@ -1,6 +1,6 @@
 # GitHub Org Security Dashboard
 
-CLI read-only para consolidar controles de seguranca por repositorio GitHub, com saida
+CLI de consulta para consolidar controles de seguranca por repositorio GitHub, com saida
 em Markdown ou JSON, sumario de postura e uma rubrica de risco documentada.
 
 ## Status
@@ -55,21 +55,21 @@ Requer Python 3.12 ou mais recente. O projeto esta em fase alpha.
 
 Clone o repositorio e entre na pasta antes de instalar:
 
-```bash
+```shell
 git clone https://github.com/lucashgrifoni/GitHub-Org-Security-Dashboard.git
 cd GitHub-Org-Security-Dashboard
 python -m venv .venv
 ```
 
-Ative o ambiente com `.venv\Scripts\Activate.ps1` no PowerShell ou `source .venv/bin/activate` no Linux.
+Ative o ambiente com o script `.venv\Scripts\Activate.ps1` no Windows ou `source .venv/bin/activate` no Linux.
 
-```bash
+```shell
 python -m pip install -e .
 ```
 
 Para desenvolvimento (ruff, mypy, pytest, coverage, build e pip-audit):
 
-```bash
+```shell
 python -m pip install -e ".[dev]"
 ```
 
@@ -80,31 +80,31 @@ Para reproduzir o ambiente usado pela CI e criar o inventario de runtime, use o
 
 Gerar um relatorio Markdown com dados sinteticos/stub:
 
-```bash
+```shell
 ghorgsec report --org example-org --repo api --repo web
 ```
 
 Gerar a partir de uma fixture JSON local:
 
-```bash
+```shell
 ghorgsec report --fixture examples/org-security-snapshot.json
 ```
 
 Saida JSON deterministica (snapshot + sumario + risco), util para automacao:
 
-```bash
+```shell
 ghorgsec report --fixture examples/org-security-snapshot.json --format json
 ```
 
 Escrever em arquivo:
 
-```bash
+```shell
 ghorgsec report --fixture examples/org-security-snapshot.json -o report.md
 ```
 
 Depois da instalacao, a CLI tambem pode ser chamada como modulo Python:
 
-```bash
+```shell
 python -m ghorgsec report --org example-org --repo api
 ```
 
@@ -133,7 +133,7 @@ Erros de entrada, autenticacao, coleta ou arquivo retornam `Error:` e codigo 2.
 Use dois arquivos JSON do mesmo owner, com timestamps e nomes de repositorio
 comparaveis. O segundo exemplo abaixo mostra apenas mudancas sinteticas:
 
-```bash
+```shell
 ghorgsec compare --baseline examples/org-security-snapshot.json --current examples/org-security-snapshot-current.json
 ghorgsec compare --baseline examples/org-security-snapshot.json --current examples/org-security-snapshot-current.json --format json -o comparison.json
 ```
@@ -161,9 +161,9 @@ Use apenas alvos proprios ou autorizados. Disponibilize um token por `GH_TOKEN` 
 `GITHUB_TOKEN`; `GH_TOKEN` nao vazio tem precedencia. O token nao e parametro da CLI,
 nao e salvo no relatorio e so e lido com `--live`.
 
-Se o GitHub CLI ja estiver autenticado, no PowerShell:
+Se o GitHub CLI ja estiver autenticado, no Windows:
 
-```powershell
+```ps1
 $env:GH_TOKEN = gh auth token --hostname github.com
 ghorgsec report --live --user SEU_LOGIN --format json -o pessoal.json
 Remove-Item Env:GH_TOKEN
@@ -175,7 +175,7 @@ coleta todos os repositorios desse inventario dentro dos limites documentados.
 
 Para filtrar repositorios de uma organizacao autorizada:
 
-```bash
+```shell
 ghorgsec report --live --org example-org --repo api --repo web -o postura.md
 ```
 
@@ -281,7 +281,7 @@ controles modelados. Os campos anteriores do relatorio permanecem disponiveis.
 
 ## Qualidade
 
-```bash
+```shell
 python -m ruff check .
 python -m mypy
 python -m coverage run -m pytest
@@ -310,7 +310,7 @@ attestation valida confirma origem e integridade, sem certificar seguranca do co
 
 Depois de baixar o wheel de 0.3.0, verifique sua origem com o GitHub CLI:
 
-```bash
+```shell
 gh attestation verify ghorgsec-0.3.0-py3-none-any.whl --repo lucashgrifoni/GitHub-Org-Security-Dashboard --signer-workflow lucashgrifoni/GitHub-Org-Security-Dashboard/.github/workflows/release.yml --source-ref refs/tags/v0.3.0 --deny-self-hosted-runners
 ```
 
