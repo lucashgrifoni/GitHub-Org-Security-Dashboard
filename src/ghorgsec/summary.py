@@ -36,7 +36,7 @@ class ControlCoverage:
 
     @property
     def assessed(self) -> int:
-        """Repositories with a known state for this control.
+        """Repositories not marked not_collected, including unknown states.
 
         Mirrors ``RepositoryRisk.assessed_controls``: it is the denominator of
         ``coverage_percent``, and zero means the control was never collected,
@@ -51,7 +51,7 @@ class ControlCoverage:
 
         ``not_collected`` repositories are excluded from the denominator so a
         skeleton snapshot with no real data does not report misleading 0%
-        coverage. Returns 0 when no repository has a known state.
+        coverage. Returns 0 when the assessed denominator is empty.
         """
 
         if self.assessed == 0:

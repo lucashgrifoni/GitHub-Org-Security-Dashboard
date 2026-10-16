@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:c2670b2fdeee9af3a2bae336716399abf748b905bee53155d1ef7f7927d900db",
+  "claims": [
+    {
+      "id": "claim_42dc95864d074182afcf2576274f4fc6",
+      "statement": "Fixture selection validates the complete snapshot, matches requested names case-insensitively, rejects absent or ambiguous names, and adds an explicit subset-coverage warning.",
+      "evidence": [
+        {
+          "resource": "repo://src/ghorgsec/cli.py#L195-L228",
+          "version": "repo-lines-v1:sha256:9b346d7b53e9a606db968f1a8b47ca48dd6fb9851cfc8edbc2525482693bb610:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE0ZjVkOTdjMjQyZDA4YmFjMDY0Y2ExNzcwMmU5ZWNlZjFiMWY1NzVmNWRlODk0OWQ2NjE2NmQyOWE4OGZkYTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZlZGEwYThmYzEwZWU0MWJkODlhMDM2MDBhZWQwZTYwNDNjNmJhMmJiM2IzOTgzMzhhM2NjZDI3NjRhMjAwZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdjYmYyMTUxYmM3YTg3ZWEzOTFhZWUxODcxYWVlZTNiNWFjMjdiY2JhZTJmMTExODU1OGM5M2ZhMDc1YWVmM2UifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_72aab307a5d04267b239ff76060ac683",
+      "statement": "Offline comparison requires equal owners and ordered timezone-aware timestamps, compares exact repository names and classifies default-branch scope changes separately from supplied state transitions.",
+      "evidence": [
+        {
+          "resource": "repo://src/ghorgsec/comparison.py#L35-L121",
+          "version": "repo-lines-v1:sha256:11a41e001c20caa3373ea1882036032d9d949f77b32569f85bb081223e4632e2:eyJzZWxlY3RlZExpbmVDb3VudCI6ODcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAyNjNkYjhlMTc5NTcxMmUzMjhhNDllNDBiNjJlMjJjZDI1NGNmYjAzYWIwNTU2MTM3YTQyNzdiNTY5ODY2NmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlYjc1MjZjMTc3ZGJlZmQzOTA1MDU1ZTM2NDQ0MjI0YzQ0MWJjZmM0NmQxNDJiYjM2YWVmMGI0YmZjNDQ2MTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhZDdiZTdkYjRhNTczOTYwMTI4NzM5NWJhNTNmYWQ0MjRlMGEwNjg3M2NjODI0YWU1NGI0ZjgxNDg0MzljNzEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_23b5a63aeccb4a80b2501f30f4303e37",
+      "statement": "The comparison CLI preserves both supplied input files against output-path aliases before writing its result.",
+      "evidence": [
+        {
+          "resource": "repo://src/ghorgsec/cli.py#L113-L184",
+          "version": "repo-lines-v1:sha256:7afedeb7c349a63796d3a12b972bbfdba9de16e4bf4aa8789522cec1132cc3b8:eyJzZWxlY3RlZExpbmVDb3VudCI6NzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdhZWJlZGI3ZTQwMjRlYjJlNmE2NGJiN2VhYjQ2NWYwYjJmNDM4ZTk1NmM4NmU4MzBjNjQ0ZTM0ZmNhOTVhMDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlNGQ4Nzk1MzEyMjE3YTJlOGE3M2ZhMTIyMzllMTY4OTIwYTY5ZWVjM2YzOGMwYWFiOGQwMGVhN2IyZjdmMGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ2MzYyOTAxZjU1N2Y4Yzg2OGJhN2IzYjgxYzUzMzc3YWQ3MWI5MTIxOWQ5MGZmZTZkYTY0OTczZjc3ZWNkZTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk5MjQ0MjAwMzk0MWY4OWUzOWQzNmEzMjNjMTkwZTUyMzA0ZmU5N2ZkMzJlODVhODM3Y2I3MzhiOWExMjBkYTIifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-16T15:30:15.076Z"
+  }
+}

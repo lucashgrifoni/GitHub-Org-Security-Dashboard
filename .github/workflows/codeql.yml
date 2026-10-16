@@ -34,7 +34,7 @@ jobs:
           persist-credentials: false
 
       - name: Initialize CodeQL
-        # github/codeql-action v4.38.2 pinned to commit SHA
+        # github/codeql-action v4.38.3 pinned to commit SHA
         uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d
         with:
           languages: python
@@ -47,7 +47,7 @@ jobs:
       # directly, so there is nothing to compile and no build script to trust.
 
       - name: Perform CodeQL analysis
-        # github/codeql-action v4.38.2 pinned to commit SHA
+        # github/codeql-action v4.38.3 pinned to commit SHA
         uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d
         with:
           category: "/language:python"

@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-This project is in alpha. Security fixes target the `0.3.x` release series and
+This project is in alpha. Security fixes target the `0.4.x` release series and
 the current `main` development line.
 
 ## Reporting a Vulnerability

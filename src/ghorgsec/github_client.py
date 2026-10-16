@@ -15,6 +15,7 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 API_ORIGIN = "https://api.github.com"
 API_VERSION = "2026-03-10"
 MAX_RESPONSE_BYTES = 8 * 1024 * 1024
+MAX_INVENTORY_BYTES = 16 * 1024 * 1024
 MAX_REQUESTS = 4100
 MAX_PAGES = 100
 REQUEST_TIMEOUT_SECONDS = 10
@@ -108,9 +109,15 @@ class UrllibTransport:
                     body.extend(chunk)
                     if len(body) > max_bytes:
                         raise GitHubCollectionError("GitHub response exceeded the size limit.")
+                response_headers: dict[str, str] = {}
+                for key, value in response.headers.items():
+                    key = key.lower()
+                    response_headers[key] = (
+                        response_headers[key] + ", " + value if key in response_headers else value
+                    )
                 return GitHubResponse(
                     response.code,
-                    {key.lower(): value for key, value in response.headers.items()},
+                    response_headers,
                     bytes(body),
                 )
         except GitHubCollectionError:
@@ -147,14 +154,18 @@ class GitHubClient:
         *,
         transport: GitHubTransport | None = None,
         max_requests: int = MAX_REQUESTS,
+        max_inventory_bytes: int = MAX_INVENTORY_BYTES,
     ) -> None:
         if not token or any(ord(char) < 33 or ord(char) > 126 for char in token):
             raise GitHubCollectionError("A nonempty, valid GitHub token is required for --live.")
         if max_requests < 1:
             raise GitHubCollectionError("The GitHub request budget must be positive.")
+        if type(max_inventory_bytes) is not int or max_inventory_bytes < 1:
+            raise GitHubCollectionError("The GitHub inventory byte budget must be positive.")
         self._token = token
         self._transport = transport if transport is not None else UrllibTransport()
         self._max_requests = max_requests
+        self._max_inventory_bytes = max_inventory_bytes
         self._requests = 0
         self._deadline = monotonic() + COLLECTION_TIMEOUT_SECONDS
 
@@ -180,9 +191,7 @@ class GitHubClient:
         if response.status == 401:
             raise GitHubCollectionError("GitHub authentication failed; check the token.")
         if _rate_limited(response):
-            raise GitHubCollectionError(
-                "GitHub rate limit reached; retry later according to GitHub's limit headers."
-            )
+            raise GitHubCollectionError(_rate_limit_message(response))
         if response.status not in (200, 204, 403, 404):
             raise GitHubCollectionError(
                 f"GitHub returned HTTP {response.status}; no complete report was produced."
@@ -197,6 +206,8 @@ class GitHubClient:
         base_query = parse_qs(initial.query)
         items: list[Any] = []
         visited: set[str] = set()
+        previous_page = 0
+        received_bytes = 0
         while url is not None:
             _validate_url(url)
             parsed = urlsplit(url)
@@ -208,17 +219,21 @@ class GitHubClient:
                 or query != initial_query
                 or len(page) != 1
                 or re.fullmatch(r"[0-9]{1,3}", page[0]) is None
-                or int(page[0]) < 1
+                or int(page[0]) <= previous_page
                 or url in visited
                 or len(visited) >= MAX_PAGES
             ):
                 raise GitHubCollectionError("GitHub pagination was invalid or exceeded its limit.")
             visited.add(url)
+            previous_page = int(page[0])
             response = self.get(url)
             if response.status != 200:
                 raise GitHubCollectionError(
                     "GitHub repository inventory is unavailable; check access and target."
                 )
+            received_bytes += len(response.body)
+            if received_bytes > self._max_inventory_bytes:
+                raise GitHubCollectionError("GitHub inventory byte budget exceeded.")
             payload = response.json()
             if not isinstance(payload, list):
                 raise GitHubCollectionError("GitHub returned an invalid repository inventory.")
@@ -226,7 +241,7 @@ class GitHubClient:
             # The collector rejects >1000 repositories. Bound accumulation here too.
             if len(items) > 1000:
                 raise GitHubCollectionError("GitHub inventory exceeds the 1000-repository limit.")
-            url = _next_link(response.headers.get("link", ""))
+            url = _next_link(_header_value(response, "link"))
         return items
 
 
@@ -235,7 +250,9 @@ def _rate_limited(response: GitHubResponse) -> bool:
         return True
     if response.status != 403:
         return False
-    if response.headers.get("x-ratelimit-remaining") == "0" or "retry-after" in response.headers:
+    if _limit_integer(response, "x-ratelimit-remaining") == 0 or any(
+        key.lower() == "retry-after" for key in response.headers
+    ):
         return True
     # Some secondary-limit responses have no limit header. Inspect, never print, the body.
     try:
@@ -246,6 +263,35 @@ def _rate_limited(response: GitHubResponse) -> bool:
     return isinstance(message, str) and any(
         marker in message.lower() for marker in ("rate limit", "abuse detection")
     )
+
+
+def _header_value(response: GitHubResponse, name: str) -> str:
+    values = [value for key, value in response.headers.items() if key.lower() == name]
+    if name == "link":
+        return ", ".join(values).strip(" \t")
+    # Ambiguous numeric headers are never trusted for diagnostic output.
+    return values[0].strip(" \t") if len(values) == 1 else ""
+
+
+def _limit_integer(response: GitHubResponse, name: str) -> int | None:
+    value = _header_value(response, name)
+    return int(value) if re.fullmatch(r"[0-9]{1,10}", value) else None
+
+
+def _rate_limit_message(response: GitHubResponse) -> str:
+    message = "GitHub rate limit reached; retry later according to GitHub's limit headers."
+    details = []
+    for header, label in (
+        ("x-ratelimit-remaining", "remaining"),
+        ("x-ratelimit-reset", "reset_unix_seconds"),
+        ("retry-after", "retry_after_seconds"),
+    ):
+        value = _limit_integer(response, header)
+        if value is not None:
+            details.append(f"{label}={value}")
+    if details:
+        message += " Safe limit headers: " + ", ".join(details) + "."
+    return message
 
 
 def _next_link(header: str) -> str | None:

@@ -2,25 +2,39 @@
   "schemaVersion": 1,
   "pages": {
     "/openwiki/architecture/collection-and-report.md": {
-      "pageVersion": "sha256:4c99881ccef2a4e6f92ced46fa15dc0d35cf704974da60f92aa06683c6c13ff7",
+      "gitHead": "87fc9cc0e5245735913d931f71f7429d74f2254e",
+      "sourceFingerprint": "sha256:6462a689e8c0eff9cd6947942cec285ddd828c6e53e3082d3edd46a78d307945",
+      "pageVersion": "sha256:fe16fff261e3be518441bc2328b8179c7bd0eeaa18210115c926ebe8c6b44f98",
       "completedBy": "codex",
-      "completedRunId": "0041d85f-e936-49b9-a58f-59bba4a43d3f",
-      "gitHead": "5dd3468d7973f4db50ecaf2ced5f1190df8188b9",
-      "sourceFingerprint": "sha256:05aa918ad942cef7502ca2dbfdd619e27c03c5285ae72e6027abb98416f052a1"
+      "completedRunId": "04456cfa-772b-4094-956d-53fb8afe1b9d"
     },
     "/openwiki/concepts/posture-semantics.md": {
-      "pageVersion": "sha256:a30c8d480f58f94a9e378058f184c4bc795609ac4514855d3f2ae5ff956ff9b4",
+      "gitHead": "87fc9cc0e5245735913d931f71f7429d74f2254e",
+      "sourceFingerprint": "sha256:6462a689e8c0eff9cd6947942cec285ddd828c6e53e3082d3edd46a78d307945",
+      "pageVersion": "sha256:38bbc3799589b8f6be3fa58f50318227e0950ebbc34688e61de8e85cd7758c8b",
       "completedBy": "codex",
-      "completedRunId": "0041d85f-e936-49b9-a58f-59bba4a43d3f",
-      "gitHead": "5dd3468d7973f4db50ecaf2ced5f1190df8188b9",
-      "sourceFingerprint": "sha256:05aa918ad942cef7502ca2dbfdd619e27c03c5285ae72e6027abb98416f052a1"
+      "completedRunId": "04456cfa-772b-4094-956d-53fb8afe1b9d"
+    },
+    "/openwiki/operations/build-and-inventory.md": {
+      "pageVersion": "sha256:d54bf19d8d5c4c32cd67ecf015c214e0be2e195587ad43332991b843f8a0f102",
+      "completedBy": "codex",
+      "completedRunId": "62e79426-80ca-4506-be8d-b4d38f71677b",
+      "gitHead": "9c27a01a3087c12a4fa097e15980d92fefff7202",
+      "sourceFingerprint": "sha256:85358f999ba58e83d14c7c32001754341ac3105e8c9dff87cf9df46d38adc124"
     },
     "/openwiki/quickstart.md": {
-      "pageVersion": "sha256:8d148e0ca54b0128f7af6c399c1a8c9b3ccd3af82a7d01c5512027e3b33028f0",
+      "gitHead": "87fc9cc0e5245735913d931f71f7429d74f2254e",
+      "sourceFingerprint": "sha256:12b4fb122f26f1a2a6b99bb750033d7541752588eb1fb61d62873cebc48a6bb1",
+      "pageVersion": "sha256:c00b393f3e08c96f49e4337562beea03fea01362db73fb9a1ec730c9eb637726",
       "completedBy": "codex",
-      "completedRunId": "0041d85f-e936-49b9-a58f-59bba4a43d3f",
-      "gitHead": "5dd3468d7973f4db50ecaf2ced5f1190df8188b9",
-      "sourceFingerprint": "sha256:05aa918ad942cef7502ca2dbfdd619e27c03c5285ae72e6027abb98416f052a1"
+      "completedRunId": "6dbf62e9-3a0f-45e3-81d6-8425a4c4366c"
+    },
+    "/openwiki/workflows/snapshot-review.md": {
+      "gitHead": "87fc9cc0e5245735913d931f71f7429d74f2254e",
+      "sourceFingerprint": "sha256:12b4fb122f26f1a2a6b99bb750033d7541752588eb1fb61d62873cebc48a6bb1",
+      "pageVersion": "sha256:c2670b2fdeee9af3a2bae336716399abf748b905bee53155d1ef7f7927d900db",
+      "completedBy": "codex",
+      "completedRunId": "6dbf62e9-3a0f-45e3-81d6-8425a4c4366c"
     }
   }
 }

@@ -54,18 +54,18 @@ class CliTests(unittest.TestCase):
         self.assertEqual(result.exit_code, 2)
         self.assertIn("--org is required", result.stderr)
 
-    def test_report_rejects_repo_combined_with_fixture(self) -> None:
+    def test_report_rejects_repo_absent_from_fixture(self) -> None:
         with TemporaryDirectory() as tmp:
             fixture_path = Path(tmp) / "snapshot.json"
             fixture_path.write_text(json.dumps(_valid_fixture_payload()), encoding="utf-8")
 
             result = runner.invoke(
                 app,
-                ["report", "--fixture", str(fixture_path), "--repo", "api"],
+                ["report", "--fixture", str(fixture_path), "--repo", "absent"],
             )
 
         self.assertEqual(result.exit_code, 2)
-        self.assertIn("--repo cannot be combined with --fixture", result.stderr)
+        self.assertIn("requested repository is absent from the snapshot", result.stderr)
 
     def test_report_from_fixture_renders_markdown(self) -> None:
         with TemporaryDirectory() as tmp:

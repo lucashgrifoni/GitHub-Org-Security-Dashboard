@@ -1,11 +1,11 @@
 ---
-type: "architecture"
-title: "Collection and report flow"
-description: "Trace input selection, fixed-origin GET collection and deterministic output handling."
-tags: ["collection","github","reports"]
+type: architecture
+title: Collection and report flow
+description: Trace validated snapshot inputs, bounded GitHub observations and deterministic output handling.
+tags: [collection, github, reports]
 verified:
   - by: openwiki/0.7.2
-    at: 2026-10-14T19:10:41.356Z
+    at: 2026-10-16T15:39:14.997Z
 sources:
   - id: openwiki-source-70e902a90f1729aeec281078
     resource: repo://src/ghorgsec/cli.py
@@ -13,21 +13,25 @@ sources:
     resource: repo://src/ghorgsec/github_client.py
   - id: openwiki-source-1199b6b14453371110d0d7f1
     resource: repo://src/ghorgsec/live_collector.py
-generated: { by: "codex", at: "2026-10-14T19:10:41.356Z" }
+generated: { by: "codex", at: "2026-10-16T15:30:15.076Z" }
 ---
 
 # Collection and report flow
 
-## CLI selects one input route
+## Select one source
 
-Fixture mode rejects combinations with live/user, org or repo selectors, because those values would conflict with the fixture's own identity. Live personal mode verifies the requested username against the authenticated account. Live organization mode verifies the organization identity, pages the inventory and rejects requested repositories absent from that inventory ([CLI routing](../../src/ghorgsec/cli.py#L89-L116), [live inventory](../../src/ghorgsec/live_collector.py#L18-L78)). These checks limit the snapshot's identity; they do not prove full account coverage.
+The CLI selects a synthetic stub, a local JSON snapshot or explicit live collection. Offline routes do not read token environment variables. Fixture input supplies the owner; an organization override or live/user mode cannot be combined with it. A repository selector can restrict a validated fixture to a documented subset ([CLI routing](../../src/ghorgsec/cli.py#L45-L108), [fixture selection](../../src/ghorgsec/cli.py#L195-L228)).
 
-## The client owns network boundaries
+Live personal collection verifies the requested username against the authenticated account. Organization collection verifies its owner identity. Both paths enumerate token-visible repositories and reject requested names absent from that inventory. Repository IDs must be positive integers and unique; metadata with another ID or name aborts collection before control queries. These checks detect identity changes during collection, but cannot make sequential observations atomic ([inventory](../../src/ghorgsec/live_collector.py#L18-L105), [metadata identity](../../src/ghorgsec/live_collector.py#L117-L135)).
 
-The transport issues GET requests. URL validation fixes the HTTPS origin to `api.github.com`; the transport refuses redirects. The client applies request, page, response-size and time budgets ([GitHub REST client](../../src/ghorgsec/github_client.py)). The live collector observes modeled control settings and emits unknown/not-collected states and warnings when the available response cannot establish the state.
+## Network boundaries
 
-## Reports own output format
+The transport issues GET requests, refuses redirects and validates a fixed HTTPS origin. The client limits requests, pages, individual response bytes and cumulative inventory bytes before decoding each page. Pagination follows the server's next link on the same resource and filters, with increasing numeric pages. Time budgets bound the checked operations without promising a wall-clock SLA ([transport](../../src/ghorgsec/github_client.py#L70-L145), [collection budgets](../../src/ghorgsec/github_client.py#L148-L245)).
 
-The selected snapshot is rendered in Markdown or JSON and written to stdout or a requested local file. The CLI refuses to overwrite its input fixture and pins output text to UTF-8 with LF bytes. Its error path writes an operator error and exits 2 ([output handling](../../src/ghorgsec/cli.py#L116-L166), [fixture/error helpers](../../src/ghorgsec/cli.py)). The output is an observation record, not a configuration mutation.
+Rate limits fail without automatic retries. Diagnostics include only validated numeric remaining/reset/retry-after values. Other headers, credentials and remote response bodies are not copied into errors. Inaccessible individual controls remain gaps; an unavailable inventory or failed collection does not become a completed partial report ([errors](../../src/ghorgsec/github_client.py#L172-L198), [rate limits](../../src/ghorgsec/github_client.py#L248-L294)).
 
-The tests under `tests/` cover CLI, fixture, report and live-client contracts with local or mocked inputs. See [posture semantics](../concepts/posture-semantics.md) before interpreting percentages.
+## Output boundaries
+
+A snapshot feeds coverage, the existing risk rubric and suggested next steps. Markdown preserves supplied text under the documented CommonMark contract; JSON retains the original values. The CLI writes UTF-8/LF output and refuses an output path aliasing a source fixture. Comparison protects both supplied files. Invalid input or output operations use exit2 ([output](../../src/ghorgsec/cli.py#L113-L184), [rendering](../../src/ghorgsec/report.py)).
+
+See [posture semantics](../concepts/posture-semantics.md) before interpreting coverage and [snapshot review](../workflows/snapshot-review.md) before treating a difference as a change on GitHub. Focused tests exercise client boundaries, fixture selection and output preservation without requiring a live organization.

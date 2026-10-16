@@ -56,18 +56,28 @@ repositorio e controle. As consultas sao sequenciais e o snapshot nao e atomico.
   transferido ou renomeado, atualize o alvo e execute novamente.
 - Paginacao usa `Link: rel="next"`, mantendo origem, recurso e filtros. Ciclos,
   links malformados, destinos inesperados ou limites excedidos encerram a coleta.
+  Os numeros de pagina devem crescer; saltos indicados pelo servidor sao aceitos.
 - Limites: 1000 repositorios, 100 paginas, 4100 requisicoes e 8 MiB por resposta.
+  O inventario tem ainda um limite agregado de 16 MiB de respostas, conferido antes
+  de decodificar cada pagina. Esse limite descreve bytes recebidos; objetos Python
+  e estruturas de parse consomem memoria adicional.
+- IDs de repositorio devem ser inteiros positivos e unicos no inventario. Mudanca
+  do ID ou nome entre inventario e metadados encerra a coleta antes dos controles.
+  Essas verificacoes detectam algumas corridas; nao tornam o snapshot atomico.
 - Timeout de operacoes de rede de ate 10 segundos, prazo de leitura por resposta e
   orcamento de 300 segundos verificado entre requisicoes. Resolucao DNS e operacoes
   bloqueantes usam o comportamento do sistema; esse orcamento nao e um SLA de duracao.
 - Sem retries automaticos. Rate limit (429 ou 403 com indicador de limite) encerra a
   coleta; respeite os headers de espera do GitHub antes de nova tentativa.
+  O erro inclui somente inteiros ASCII de ate dez digitos dos headers remaining,
+  reset (epoch UTC) e retry-after (segundos), quando validos. Valores invalidos e
+  headers arbitrarios nunca sao copiados para o diagnostico.
 - 401, falha de transporte, resposta inesperada ou JSON/metadados invalidos encerram
   a coleta. 403/404 por controle geram gaps; 403/404 do inventario encerram a coleta.
 - Falhas de coleta retornam codigo 2 e preservam um arquivo de saida existente.
   Nenhum relatorio parcial e apresentado como coleta concluida.
 
-Erros nao incluem token, body remoto ou headers. O cliente reduz respostas a metadados
+Erros nao incluem token, body remoto ou headers arbitrarios. O cliente reduz respostas a metadados
 e estados; nao consulta conteudo de secrets ou alertas de vulnerabilidade. A resposta
 de GET /user e usada apenas para conferir o login; os demais dados de perfil nao sao
 incluidos no relatorio.

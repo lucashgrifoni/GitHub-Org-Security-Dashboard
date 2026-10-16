@@ -1,6 +1,6 @@
 # GitHub Org Security Dashboard
 
-CLI read-only para consolidar controles de seguranca por repositorio GitHub, com saida
+CLI de consulta para consolidar controles de seguranca por repositorio GitHub, com saida
 em Markdown ou JSON, sumario de postura e uma rubrica de risco documentada.
 
 ## Status
@@ -24,7 +24,7 @@ ausencia de vulnerabilidades ou conformidade. Consulte o [contrato live](docs/LI
 
 ## Escopo atual
 
-- CLI minima com Typer (`report`).
+- CLI com Typer (`report` e comparacao offline `compare`).
 - Modelo tipado de organizacao, repositorio e controles de seguranca.
 - Collector stub seguro, offline por padrao.
 - Collector live opt-in, com inventario paginado e gaps por controle.
@@ -33,6 +33,8 @@ ausencia de vulnerabilidades ou conformidade. Consulte o [contrato live](docs/LI
 - Sumario de postura: cobertura por controle, com `not_collected` excluido do denominador.
 - Classificacao de risco deterministica por repositorio (rubrica documentada).
 - Saida em Markdown ou JSON deterministico.
+- Proximos passos que distinguem controles desabilitados de lacunas de evidencia.
+- Comparacao local de dois snapshots com mudancas de estado, evidencia e escopo.
 - Testes unitarios sem chamadas de rede; ruff, mypy estrito e cobertura configurados.
 
 ## Limites do produto
@@ -44,61 +46,65 @@ ausencia de vulnerabilidades ou conformidade. Consulte o [contrato live](docs/LI
 
 ## Setup
 
-A CI do código-fonte também executa um [piloto de higiene de segredos](docs/secrets-hygiene-pilot.md)
-com Gitleaks e secguard. Ele começa em modo de relatório; falhas de execução
-continuam fazendo o job falhar. A CLI ghorgsec mantém seu uso offline descrito acima.
+A CI do codigo-fonte inclui um [gate de higiene de segredos](docs/secrets-hygiene-pilot.md)
+com Gitleaks e secguard. Achados ativos a partir de high e erros de execucao fazem
+o job falhar. Esse controle pertence ao repositorio do projeto e nao altera
+configuracoes dos repositorios observados pela CLI.
 
 Requer Python 3.12 ou mais recente. O projeto esta em fase alpha.
 
 Clone o repositorio e entre na pasta antes de instalar:
 
-```bash
+```shell
 git clone https://github.com/lucashgrifoni/GitHub-Org-Security-Dashboard.git
 cd GitHub-Org-Security-Dashboard
 python -m venv .venv
 ```
 
-Ative o ambiente com `.venv\Scripts\Activate.ps1` no PowerShell ou `source .venv/bin/activate` no Linux.
+Ative o ambiente com o script `.venv\Scripts\Activate.ps1` no Windows ou `source .venv/bin/activate` no Linux.
 
-```bash
+```shell
 python -m pip install -e .
 ```
 
 Para desenvolvimento (ruff, mypy, pytest, coverage, build e pip-audit):
 
-```bash
+```shell
 python -m pip install -e ".[dev]"
 ```
+
+Para reproduzir o ambiente usado pela CI e criar o inventario de runtime, use o
+[guia de build e SBOM](docs/RELEASE.md). Os lockfiles incluem versoes e hashes.
 
 ## Uso
 
 Gerar um relatorio Markdown com dados sinteticos/stub:
 
-```bash
+```shell
 ghorgsec report --org example-org --repo api --repo web
 ```
 
 Gerar a partir de uma fixture JSON local:
 
-```bash
+```shell
 ghorgsec report --fixture examples/org-security-snapshot.json
 ```
 
 Saida JSON deterministica (snapshot + sumario + risco), util para automacao:
 
-```bash
+```shell
 ghorgsec report --fixture examples/org-security-snapshot.json --format json
 ```
 
 Escrever em arquivo:
 
-```bash
+```shell
 ghorgsec report --fixture examples/org-security-snapshot.json -o report.md
 ```
 
 Depois da instalacao, a CLI tambem pode ser chamada como modulo Python:
 
-```bash
+```shell
 python -m ghorgsec report --org example-org --repo api
 ```
 
@@ -111,13 +117,43 @@ nem suas dependencias. Use a instalacao acima antes de executar os exemplos.
 - `--user`: conta pessoal autenticada, apenas com `--live`; nao combinavel com `--org`.
 - `--live`: habilita leituras na API GitHub usando `GH_TOKEN` ou `GITHUB_TOKEN`.
 - `--repo`: nome repetivel; no stub inclui nomes, no live filtra o inventario visivel ao token.
+- Com `--fixture`, `--repo` seleciona nomes sem distinguir maiusculas/minusculas,
+  mantendo a ordem da fonte. Nomes ausentes ou ambiguos sao recusados; todo o JSON
+  e validado antes da selecao e a cobertura passa a descrever somente o subconjunto.
 - `--fixture`: fixture JSON local a renderizar.
 - `--format`: `md` (padrao) ou `json`.
 - `--output` / `-o`: caminho de saida local opcional.
 
-`--fixture` nao aceita `--org`, `--repo`, `--user` ou `--live`. Codigo de saida 0 indica
+`--fixture` nao aceita `--org`, `--user` ou `--live`. Codigo de saida 0 indica
 relatorio gerado, mesmo com controles `unknown`; nao funciona como gate de seguranca.
 Erros de entrada, autenticacao, coleta ou arquivo retornam `Error:` e codigo 2.
+
+### Comparar snapshots locais
+
+Use dois arquivos JSON do mesmo owner, com timestamps e nomes de repositorio
+comparaveis. O segundo exemplo abaixo mostra apenas mudancas sinteticas:
+
+```shell
+ghorgsec compare --baseline examples/org-security-snapshot.json --current examples/org-security-snapshot-current.json
+ghorgsec compare --baseline examples/org-security-snapshot.json --current examples/org-security-snapshot-current.json --format json -o comparison.json
+```
+
+`compare` funciona offline, sem ler token. Aceita fixtures ou JSON gerado por `report`;
+recalcula as mudancas a partir dos controles e ignora scores e sumarios importados.
+O arquivo atual deve ter timestamp igual ou posterior ao baseline; owners diferentes
+sao recusados. Timestamps iguais sao aceitos com aviso. `--output` preserva ambos
+os arquivos de entrada, incluindo aliases por caminho resolvido e hard link.
+
+As classificacoes `enabled_observed` e `disabled_observed` representam transicoes
+entre estados conhecidos. `evidence_gained`, `evidence_lost` e `gap_changed` descrevem
+mudancas na evidencia disponivel. `scope_changed` indica outra default branch;
+a comparacao de branch protection passa a ter escopo diferente.
+
+Repositorios presentes em apenas um arquivo indicam mudanca de inventario dos
+snapshots. Filtros, permissoes, renomeacao ou coleta parcial podem explicar essa
+diferenca. Ela nao comprova criacao ou exclusao. Nomes e owners sao comparados
+exatamente; o comando nao identifica renomeacoes por ID. A comparacao local tambem
+nao autentica a origem dos arquivos nem comprova remediacao ou enforcement.
 
 ### Coleta real
 
@@ -125,9 +161,9 @@ Use apenas alvos proprios ou autorizados. Disponibilize um token por `GH_TOKEN` 
 `GITHUB_TOKEN`; `GH_TOKEN` nao vazio tem precedencia. O token nao e parametro da CLI,
 nao e salvo no relatorio e so e lido com `--live`.
 
-Se o GitHub CLI ja estiver autenticado, no PowerShell:
+Se o GitHub CLI ja estiver autenticado, no Windows:
 
-```powershell
+```ps1
 $env:GH_TOKEN = gh auth token --hostname github.com
 ghorgsec report --live --user SEU_LOGIN --format json -o pessoal.json
 Remove-Item Env:GH_TOKEN
@@ -139,7 +175,7 @@ coleta todos os repositorios desse inventario dentro dos limites documentados.
 
 Para filtrar repositorios de uma organizacao autorizada:
 
-```bash
+```shell
 ghorgsec report --live --org example-org --repo api --repo web -o postura.md
 ```
 
@@ -183,7 +219,10 @@ A fixture aceita ainda um array opcional `warnings` com avisos nao vazios, rende
 
 O loader recusa uma fixture que declare a mesma chave JSON duas vezes: `json.loads` manteria a ultima ocorrencia, entao um documento que diz `disabled` e depois `enabled` seria lido como habilitado. Nomes de repositorio duplicados ja eram recusados; e a mesma regra um nivel abaixo. Uma fixture aninhada alem do limite de recursao tambem e recusada. Toda entrada malformada reporta `Error: ...` e sai com codigo 2.
 
-Valores de texto sao achatados em uma linha ao renderizar Markdown, para que uma quebra de linha em um nome ou aviso nao injete titulos nem parta a tabela de postura.
+Valores de texto sao achatados em uma linha e escapados ao renderizar Markdown.
+Nomes, branches e avisos com HTML, links ou marcadores Markdown ficam visiveis como
+texto no contrato CommonMark com tabelas. O JSON conserva os valores originais.
+Extensoes de outros visualizadores, como autolinks, podem alterar a apresentacao.
 
 Os controles tambem podem ser escritos diretamente no objeto do repositorio, sem `controls`.
 A fixture deve escolher uma das duas representacoes por repositorio; misturar as duas e recusado,
@@ -202,7 +241,10 @@ caminho e substituido; escolha um novo nome se precisar preservar a versao anter
 
 O relatorio inclui uma secao `Posture Summary` com contagem por estado de cada controle e a cobertura de "enabled". O denominador da cobertura exclui `not_collected`, para que um snapshot parcial nao reporte 0% enganoso.
 
-Quando nenhum repositorio reportou estado conhecido para um controle, o denominador e zero e a cobertura aparece como `not_assessed`. Um controle que ninguem coletou e um controle desligado em todo lugar sao afirmacoes diferentes, e antes as duas renderizavam como `0%`.
+Quando todos os estados de um controle sao `not_collected`, ou o inventario esta vazio,
+o denominador e zero e a cobertura aparece como `not_assessed`. Se todos os estados
+sao `unknown`, o denominador inclui esses repositorios e a cobertura habilitada e 0%;
+isso nao confirma que o controle esteja desabilitado.
 
 No JSON, cada controle inclui `assessed` (denominador) e `coverage_status` (`assessed` ou
 `not_assessed`). O campo numerico `coverage_percent` preserva o valor `0` quando o denominador
@@ -225,9 +267,21 @@ Cada linha de risco mostra a quantidade de controles nao coletados e `assessment
 descreve apenas os controles informados. `complete` significa que nenhum controle ficou como
 `not_collected`; controles `unknown` continuam explicitamente indeterminados.
 
+## Proximos passos
+
+O relatorio separa tres grupos: `disabled` sugere revisar configuracao com o owner;
+`unknown` sugere verificar acesso e permissoes de coleta; `not_collected` sugere
+coletar evidencia. Controles `enabled` nao geram item. Sao sugestoes para revisao,
+sem alterar configuracoes ou a rubrica de risco.
+
+O JSON acrescenta `next_steps`, uma lista de objetos com `repository`, `control`,
+`state` e `action`. As acoes sao `review_configuration`, `verify_access` e
+`collect_evidence`. A ordem usa o nome exato do repositorio e a ordem dos quatro
+controles modelados. Os campos anteriores do relatorio permanecem disponiveis.
+
 ## Qualidade
 
-```bash
+```shell
 python -m ruff check .
 python -m mypy
 python -m coverage run -m pytest
@@ -256,7 +310,7 @@ attestation valida confirma origem e integridade, sem certificar seguranca do co
 
 Depois de baixar o wheel de 0.3.0, verifique sua origem com o GitHub CLI:
 
-```bash
+```shell
 gh attestation verify ghorgsec-0.3.0-py3-none-any.whl --repo lucashgrifoni/GitHub-Org-Security-Dashboard --signer-workflow lucashgrifoni/GitHub-Org-Security-Dashboard/.github/workflows/release.yml --source-ref refs/tags/v0.3.0 --deny-self-hosted-runners
 ```
 
@@ -275,6 +329,8 @@ de attestations do GitHub](https://docs.github.com/en/actions/how-tos/secure-you
 - `src/ghorgsec/fixture_loader.py`: loader de snapshot a partir de JSON local.
 - `src/ghorgsec/summary.py`: agregacao de postura.
 - `src/ghorgsec/risk.py`: classificacao de risco deterministica.
+- `src/ghorgsec/actions.py`: sugestoes de revisao e coleta de evidencia.
+- `src/ghorgsec/comparison.py`: comparacao pura de snapshots locais.
 - `src/ghorgsec/report.py`: relatorio Markdown.
 - `src/ghorgsec/serialize.py`: serializacao JSON deterministica.
 - `src/ghorgsec/cli.py`: comandos Typer.

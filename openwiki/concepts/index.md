@@ -1,3 +1,3 @@
 # Files
 
-- [Posture and collection semantics](posture-semantics.md) - Interpret four modeled controls without treating uncollected or unknown state as confirmed coverage.
+- [Posture states, coverage and review steps](posture-semantics.md) - Interpret coverage, ratings and suggested next steps without confusing evidence gaps with disabled controls.
