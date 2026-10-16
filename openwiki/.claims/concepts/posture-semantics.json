@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:38bbc3799589b8f6be3fa58f50318227e0950ebbc34688e61de8e85cd7758c8b",
+  "pageVersion": "sha256:59e478dad2ede2e383c1dba33cd4489cf56f236e71e4eb489d9a6eb67ff3e967",
   "claims": [
     {
       "id": "claim_a068d27e911a464ba9e70d3823c81010",
       "statement": "Coverage excludes not_collected, includes unknown, uses integer-floor enabled/assessed percentage and returns zero for an empty assessed denominator.",
       "evidence": [
         {
-          "resource": "repo://src/ghorgsec/summary.py#L23-L60",
-          "version": "repo-lines-v1:sha256:8d827b7173c409f39cca6ad2ce34d970b577292dac2f4cdef67697e3cc4ba8e3:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwYTQwYTY3MGQ1NGI1MTc3NmVkY2Q0Nzk0ZjdmM2QyZjY1OTU1Yjg4YzdlNTUwYzg0ZjM4MWYzYjZiZTIwMmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY4ODUyM2NlYWVhMmIzYjY1NDRhZDY0YjdiN2M2ODI0ZDY1MjNlMjE0YTYyYzcwNTIzZThlOThhODhiYmNkZTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc2YzJhYjI2NWQ5Njg4OTVkZWVkOGQ4OTFhYzJmNjVjZTRkYmIzMmY0OGE1NGNiZjMyY2JjYjQxMDEyM2YyNDMifQ"
+          "resource": "repo://src/ghorgsec/summary.py#L33-L59",
+          "version": "repo-lines-v1:sha256:d397e3968b8b99b62ee40377aba64de8fe56b66d4fb2bfa0b78c4b4badec972e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzZDAwY2YyNzA5NjRkNDRhMTNkZmFjODc1MmIwOWZjYzQzNWIwZjE5YjMxNmFiY2Y4MWE3YWE2NGJiMTIyZDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwNDg4MmEzZWU0NDVlMTZjY2IwNWE0ODEwY2VkNjRjY2IzZDdlN2I0YmY1NTA3ZjRiNjBjYzA0YzI5YWE5MjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI0OWE5MTBmMjBkNDMxMTQyZWI5OWU1ZjEwZTA1OWY5YTkxMjc4ODVjMzQwZTc2YTI0MWVmOTFkYWE2MzczZTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhOGI5Y2MwZmJmZGU2Y2ZlMGRiNjFlMTBjOGFmYTkzNzg4NDkxZTY5ZWViZGRhMjJkNWZjOWUzODkxODNlMzYifQ"
         }
       ]
     },
@@ -35,6 +35,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-10-16T15:39:14.997Z"
+    "at": "2026-10-16T16:23:41.573Z"
   }
 }

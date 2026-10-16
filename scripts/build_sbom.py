@@ -13,6 +13,7 @@ import sys
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
+from uuid import uuid4
 
 from packaging.licenses import canonicalize_license_expression
 from packaging.requirements import Requirement
@@ -82,6 +83,7 @@ def build_sbom(reports: list[dict[str, Any]], wheel: Path) -> dict[str, Any]:
         "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
         "bomFormat": "CycloneDX",
         "specVersion": "1.6",
+        "serialNumber": uuid4().urn,
         "version": 1,
         "metadata": {
             "component": components["ghorgsec"],

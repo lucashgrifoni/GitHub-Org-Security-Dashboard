@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 from typing import Any
+from uuid import UUID
 
 import pytest
 from cyclonedx.schema import SchemaVersion
@@ -27,6 +28,18 @@ def report(install: list[dict[str, Any]], platform: str = "linux") -> dict[str, 
         "version": "1", "environment": {**default_environment(), "sys_platform": platform},
         "install": install,
     }
+
+
+def test_sbom_has_unique_rfc4122_identity_for_attestation_consumers(tmp_path: Path) -> None:
+    wheel = tmp_path / "application.whl"
+    wheel.write_bytes(b"synthetic application archive")
+    root = entry("ghorgsec", [], hashlib.sha256(wheel.read_bytes()).hexdigest())
+    first = build_sbom([report([root])], wheel)
+    second = build_sbom([report([root])], wheel)
+    assert first["serialNumber"].startswith("urn:uuid:")
+    assert UUID(first["serialNumber"][9:]).version == 4
+    assert second["serialNumber"] != first["serialNumber"]
+    assert JsonStrictValidator(SchemaVersion.V1_6).validate_str(json.dumps(first)) is None
 
 
 @pytest.mark.parametrize("platform", ["linux", "win32"])
