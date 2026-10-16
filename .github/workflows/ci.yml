@@ -44,7 +44,9 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Install project with dev dependencies
-        run: python -m pip install -e ".[dev]"
+        run: |
+          python -m pip install --require-hashes -r requirements-dev.lock
+          python -m pip install --no-deps --no-build-isolation -e .
 
       - name: Ruff (lint)
         run: python -m ruff check .
@@ -56,6 +58,31 @@ jobs:
         run: |
           python -m coverage run -m pytest
           python -m coverage report --fail-under=95
+
+      - name: Verify installed wheel and runtime inventory on this platform
+        shell: bash
+        run: |
+          python -m build --wheel --no-isolation --outdir "$RUNNER_TEMP/ghorgsec-wheel"
+          python -m venv "$RUNNER_TEMP/ghorgsec-runtime"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            runtime_python="$RUNNER_TEMP/ghorgsec-runtime/Scripts/python.exe"
+          else
+            runtime_python="$RUNNER_TEMP/ghorgsec-runtime/bin/python"
+          fi
+          "$runtime_python" -m pip install --require-hashes -r requirements-runtime.lock --report "$RUNNER_TEMP/runtime-install.json"
+          "$runtime_python" -m pip install --no-deps "$RUNNER_TEMP"/ghorgsec-wheel/ghorgsec-*.whl --report "$RUNNER_TEMP/application-install.json"
+          "$runtime_python" -m pip check
+          "$runtime_python" scripts/smoke_installed.py examples/org-security-snapshot.json
+          python scripts/build_sbom.py --report "$RUNNER_TEMP/runtime-install.json" --report "$RUNNER_TEMP/application-install.json" --wheel "$RUNNER_TEMP"/ghorgsec-wheel/ghorgsec-*.whl --output "$RUNNER_TEMP/runtime.cdx.json"
+
+      - name: Retain platform runtime inventory
+        # actions/upload-artifact v7.0.2, same verified pin as the release workflow
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: runtime-${{ runner.os }}-py${{ matrix.python }}
+          path: ${{ runner.temp }}/runtime.cdx.json
+          if-no-files-found: error
+          retention-days: 30
 
   package:
     name: Build, installed CLI, dependency audit
@@ -75,19 +102,22 @@ jobs:
           python-version: "3.12"
 
       - name: Install build and audit tools
-        run: python -m pip install -e ".[dev]"
+        run: |
+          python -m pip install --require-hashes -r requirements-dev.lock
+          python -m pip install --no-deps --no-build-isolation -e .
 
       - name: Audit runtime and development dependencies
         run: python scripts/audit_environment.py
 
       - name: Build wheel and source distribution
-        run: python -m build
+        run: python -m build --no-isolation
 
       - name: Verify the installed wheel outside the source tree
         shell: bash
         run: |
           python -m venv "$RUNNER_TEMP/ghorgsec-smoke"
-          "$RUNNER_TEMP/ghorgsec-smoke/bin/python" -m pip install dist/ghorgsec-*.whl
+          "$RUNNER_TEMP/ghorgsec-smoke/bin/python" -m pip install --require-hashes -r requirements-runtime.lock
+          "$RUNNER_TEMP/ghorgsec-smoke/bin/python" -m pip install --no-deps dist/ghorgsec-*.whl
           "$RUNNER_TEMP/ghorgsec-smoke/bin/python" scripts/smoke_installed.py examples/org-security-snapshot.json
 
   required:

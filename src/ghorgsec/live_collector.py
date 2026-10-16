@@ -43,12 +43,18 @@ def collect_live_snapshot(
         inventory_path = f"/orgs/{owner}/repos?type=all&sort=full_name&per_page=100"
 
     inventory: dict[str, dict[str, Any]] = {}
+    seen_ids: set[int] = set()
     for item in client.pages(inventory_path):
         repo = _repository(item, owner)
         key = str(repo["name"]).casefold()
         if key in inventory:
             raise GitHubCollectionError("GitHub inventory contains duplicate repositories; retry.")
+        if repo["id"] in seen_ids:
+            raise GitHubCollectionError(
+                "GitHub inventory contains duplicate repository IDs; retry."
+            )
         inventory[key] = repo
+        seen_ids.add(repo["id"])
     if requested - inventory.keys():
         raise GitHubCollectionError(
             "A requested repository is absent from the token-visible inventory; check access."
@@ -88,6 +94,8 @@ def _repository(payload: Any, owner: str) -> dict[str, Any]:
     if not isinstance(payload, dict) or not isinstance(payload.get("name"), str):
         raise GitHubCollectionError("GitHub returned invalid repository metadata.")
     _repository_name(payload["name"])
+    if type(payload.get("id")) is not int or payload["id"] < 1:
+        raise GitHubCollectionError("GitHub returned an invalid repository ID.")
     identity = payload.get("owner")
     if (
         not isinstance(identity, dict)
@@ -119,7 +127,7 @@ def _collect_repository(
     secret = ControlState.UNKNOWN
     if response.status == 200:
         metadata = _repository(response.json(), owner)
-        if metadata["name"].casefold() != name.casefold():
+        if metadata["name"].casefold() != name.casefold() or metadata["id"] != inventory["id"]:
             raise GitHubCollectionError("Repository identity changed during collection; retry.")
         analysis = metadata.get("security_and_analysis")
         setting = analysis.get("secret_scanning") if isinstance(analysis, dict) else None

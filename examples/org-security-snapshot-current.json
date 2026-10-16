@@ -1,0 +1,40 @@
+{
+  "organization": "example-org",
+  "generated_at": "2026-05-19T12:00:00+00:00",
+  "warnings": ["Second synthetic snapshot; these changes were not observed on GitHub."],
+  "repositories": [
+    {
+      "name": "payments-api",
+      "default_branch": "main",
+      "visibility": "private",
+      "controls": {
+        "branch_protection": "enabled",
+        "secret_scanning": "enabled",
+        "code_scanning": "enabled",
+        "dependabot_alerts": "disabled"
+      }
+    },
+    {
+      "name": "legacy-worker",
+      "default_branch": "main",
+      "visibility": "private",
+      "controls": {
+        "branch_protection": "enabled",
+        "secret_scanning": "enabled",
+        "code_scanning": "enabled",
+        "dependabot_alerts": "disabled"
+      }
+    },
+    {
+      "name": "docs-site",
+      "default_branch": "main",
+      "visibility": "public",
+      "controls": {
+        "branch_protection": "enabled",
+        "secret_scanning": "enabled",
+        "code_scanning": "not_collected",
+        "dependabot_alerts": "enabled"
+      }
+    }
+  ]
+}

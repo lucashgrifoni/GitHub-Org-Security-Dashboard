@@ -12,6 +12,8 @@ ou conta pessoal autenticada, com saida Markdown e JSON e coleta offline por pad
 - Gerar relatorio Markdown e JSON a partir de um snapshot em memoria.
 - Carregar snapshots simulados a partir de fixtures JSON locais, com validacao de contrato.
 - Derivar sumario de postura e classificacao de risco por repositorio de forma deterministica.
+- Separar sugestoes de revisao de configuracao de lacunas de evidencia no relatorio.
+- Comparar dois snapshots JSON locais do mesmo owner sem chamadas de rede.
 - Manter o collector offline/stub por padrao.
 - Acessar GitHub real somente com `--live`, token explicito por ambiente e alvo autorizado.
 - Exigir token somente no modo live; preservar o collector stub e fixtures sem rede.
@@ -44,6 +46,9 @@ O campo JSON `organization` continua contendo o owner, preservando o schema exis
 - O JSON preserva `coverage_percent` numerico e acrescenta `assessed` e `coverage_status` por controle. Denominador zero tem `coverage_status=not_assessed`.
 - O risco inclui `not_collected_controls` e `assessment_status` (`complete`, `partial`, `not_assessed`). `unknown` participa da avaliacao; `complete` descreve coleta, sem afirmar que todos os estados sao conhecidos ou habilitados.
 - A CLI produz os mesmos bytes em stdout e arquivo para a mesma fixture, com UTF-8, LF e uma unica quebra de linha final. O stub usa a hora corrente no snapshot.
+- O JSON acrescenta `next_steps` com repository, control, state e action, sem mudar scores.
+  disabled gera review_configuration; unknown gera verify_access; not_collected gera
+  collect_evidence; enabled nao gera item. Markdown separa esses tres grupos.
 
 ## Fixture JSON Local
 
@@ -65,6 +70,34 @@ inteiros alem do limite de conversao do Python e texto com surrogates isolados s
 Valores textuais renderizados no Markdown sao achatados em uma linha. Sem isso, uma quebra de linha em `organization`, `name`, `default_branch` ou num aviso injeta titulos e parte uma linha de tabela, empurrando repositorios para fora do relatorio renderizado. O dado continua visivel; apenas deixa de forjar estrutura.
 
 O `collection_mode` do snapshot carregado por fixture e sempre `fixture_json`, independentemente do conteudo do arquivo, para evitar relatorios que aparentem ter vindo de coleta real.
+
+HTML e sintaxe Markdown em nomes, metadados e avisos sao renderizados como texto
+literal em CommonMark com tabelas. Code spans usam delimitadores maiores que os
+backticks da entrada. O JSON mantem os valores originais. Extensoes de visualizadores
+ficam fora desse contrato de apresentacao.
+
+## Comparacao Local
+
+`compare --baseline arquivo.json --current arquivo.json` usa o mesmo loader estrito
+do relatorio. Aceita `--format md|json` e `--output`, e nunca le credenciais.
+O JSON de comparacao tem schema_version=1 e collection_mode=local_snapshot_comparison.
+Ele inclui owner, baseline_at, current_at, warnings, summary, added_repositories,
+missing_repositories e changes. Cada change tem repository, control, before, after
+e classification. Summary conta controles alterados e inalterados em repositorios
+presentes nos dois arquivos. Metadados de score e sumario da entrada sao ignorados.
+
+Owners e nomes sao comparados exatamente, sem resolver renomeacoes. O current precisa
+ter data igual ou posterior ao baseline; datas iguais geram aviso. As classes sao:
+enabled_observed (disabled para enabled), disabled_observed (enabled para disabled),
+evidence_gained (lacuna para conhecido), evidence_lost (conhecido para lacuna),
+gap_changed (unknown versus not_collected) e scope_changed (outra default branch).
+scope_changed tem precedencia para branch protection, inclusive quando o estado nao
+muda. Estados iguais em escopo igual contam como inalterados.
+
+Presenca em apenas um snapshot nao prova criacao ou exclusao. Avisos das duas fontes
+continuam no resultado, identificados como baseline/current. Arquivos locais nao
+comprovam proveniencia, remediacao ou enforcement. O comando preserva as duas entradas
+contra sobrescrita por caminho resolvido ou hard link e usa o contrato Error:/exit 2.
 
 ## Decisoes de Seguranca
 

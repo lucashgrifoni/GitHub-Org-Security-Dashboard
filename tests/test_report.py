@@ -133,14 +133,18 @@ class ReportTests(unittest.TestCase):
                 "## Posture Summary",
                 "## Repository Controls",
                 "## Repository Risk",
+                "## Next Steps",
+                "### Disabled controls",
+                "### Unknown controls",
+                "### Not collected controls",
             ],
         )
 
         # Every table row stays on exactly one line, so no repository can be
         # pushed out of the rendered table by a crafted neighbour.
         rows = [line for line in markdown.splitlines() if line.startswith("|")]
-        # 6 posture-summary rows + 3 control rows + 3 risk rows.
-        self.assertEqual(len(rows), 12)
+        # Existing 12 rows plus a header, separator and four disabled steps.
+        self.assertEqual(len(rows), 18)
         for row in rows:
             self.assertEqual(len(row.splitlines()), 1)
 

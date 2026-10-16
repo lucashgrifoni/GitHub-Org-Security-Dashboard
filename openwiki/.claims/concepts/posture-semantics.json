@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:a30c8d480f58f94a9e378058f184c4bc795609ac4514855d3f2ae5ff956ff9b4",
+  "pageVersion": "sha256:38bbc3799589b8f6be3fa58f50318227e0950ebbc34688e61de8e85cd7758c8b",
   "claims": [
     {
       "id": "claim_a068d27e911a464ba9e70d3823c81010",
       "statement": "Coverage excludes not_collected, includes unknown, uses integer-floor enabled/assessed percentage and returns zero for an empty assessed denominator.",
       "evidence": [
         {
-          "resource": "repo://src/ghorgsec/summary.py#L14-L61",
-          "version": "repo-lines-v1:sha256:130e631795f932649a125262082daedc2aa01380debe14e31e81fbfd6ded902e:eyJzZWxlY3RlZExpbmVDb3VudCI6NDgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVmM2VjZmM3ODVkNmU2OWIzMTI0NDQ0MzQ2NjJhNTU0NjJlOGZlZTkzYzg5NzIzNjg0ZDQ0ODQ5MTFjNDJhMGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYzNjc5NDg1NjA0OTE4NDViMzhlZTY3MDczOTE2YTk2OWRhYjJmMDdiMmUxMzkyMjk0ZDg1M2RlNzgxY2IwZGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk4MzAyNDE1MzJlZGE4NDkwMDk2YWE3OTBhOTNhNTUwZjMyNDAwMzcyNGE2MjU4YzBkMDlmMTg4ZGVkMWE0NWYifQ"
+          "resource": "repo://src/ghorgsec/summary.py#L23-L60",
+          "version": "repo-lines-v1:sha256:8d827b7173c409f39cca6ad2ce34d970b577292dac2f4cdef67697e3cc4ba8e3:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwYTQwYTY3MGQ1NGI1MTc3NmVkY2Q0Nzk0ZjdmM2QyZjY1OTU1Yjg4YzdlNTUwYzg0ZjM4MWYzYjZiZTIwMmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY4ODUyM2NlYWVhMmIzYjY1NDRhZDY0YjdiN2M2ODI0ZDY1MjNlMjE0YTYyYzcwNTIzZThlOThhODhiYmNkZTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc2YzJhYjI2NWQ5Njg4OTVkZWVkOGQ4OTFhYzJmNjVjZTRkYmIzMmY0OGE1NGNiZjMyY2JjYjQxMDEyM2YyNDMifQ"
         }
       ]
     },
@@ -21,10 +21,20 @@
           "version": "repo-file-v1:sha256:c3b5350a5a36691412405ea9ce5a5e096f29dc541876ae55a4dc8802793d555f"
         }
       ]
+    },
+    {
+      "id": "claim_971657b4e9ba48568ae02bbbc867b10c",
+      "statement": "Suggested next steps distinguish disabled, unknown and not_collected controls, exclude enabled, and preserve deterministic repository/control ordering without changing the score.",
+      "evidence": [
+        {
+          "resource": "repo://src/ghorgsec/actions.py#L8-L42",
+          "version": "repo-lines-v1:sha256:8c8ac7d2682d7b33bb8efac3d603d0da1a570dce9fdaac29f4e8dd97ef473206:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYxMzc0NDRhNDFmOTRiYWRhYTUyM2RkMGQwZjgyODk2ODAxNTRkZmFlNWMwOWE5YTIzZTBkNjQ4NGE2YzQ3MzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1Mjk1ZWUwMTU0MWZjYWZkZDY1MGZkZWU2ZjY2MTExNjM0Zjg1MTRjMDRlMzY2NjJhNzA3OTE5OTY0MmRmMTIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcxYjk0ODNlM2U1MTZlMmVhNGFlNmVkMWJjMDg2YzczNzQ2NTNmOThmZDc3NGNjM2FmNzNmZDk2ZmY4ZjBiNTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-10-14T19:10:41.356Z"
+    "at": "2026-10-16T15:39:14.997Z"
   }
 }

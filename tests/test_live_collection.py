@@ -68,6 +68,7 @@ class FakeTransport:
 
 def repository(name: str = "api", **fields: Any) -> dict[str, Any]:
     return {
+        "id": int.from_bytes(name.casefold().encode("utf-8"), "big"),
         "name": name,
         "owner": {"login": "example"},
         "default_branch": "main",
@@ -380,6 +381,148 @@ def test_auth_rate_limit_server_errors_and_redirects_stop_without_retry(
         GitHubClient(TOKEN, transport=transport).get("/user")
     assert TOKEN not in str(caught.value)
     assert len(transport.calls) == 1
+
+
+def test_rate_limit_exposes_only_validated_retry_guidance_without_retry() -> None:
+    transport = FakeTransport({
+        "/user": response({"message": TOKEN}, 429, {
+            "x-ratelimit-remaining": "0",
+            "x-ratelimit-reset": "1792166400",
+            "retry-after": "60",
+            "x-ratelimit-resource": TOKEN,
+        }),
+    })
+    with pytest.raises(GitHubCollectionError) as caught:
+        GitHubClient(TOKEN, transport=transport).get("/user")
+    text = str(caught.value)
+    assert "remaining=0" in text
+    assert "reset_unix_seconds=1792166400" in text
+    assert "retry_after_seconds=60" in text
+    assert TOKEN not in text
+    assert len(transport.calls) == 1
+
+
+@pytest.mark.parametrize("value", [TOKEN, "-1", "1.5", "1\nsecret", "\uff19", "1" * 100, ""])
+def test_rate_limit_does_not_echo_invalid_header_values(value: str) -> None:
+    transport = FakeTransport({"/user": response({}, 429, {
+        "x-ratelimit-reset": value,
+        "retry-after": value,
+    })})
+    with pytest.raises(GitHubCollectionError) as caught:
+        GitHubClient(TOKEN, transport=transport).get("/user")
+    assert "reset_unix_seconds=" not in str(caught.value)
+    assert "retry_after_seconds=" not in str(caught.value)
+    assert TOKEN not in str(caught.value)
+    assert len(transport.calls) == 1
+
+
+def test_inventory_byte_budget_is_cumulative_and_checked_before_decoding() -> None:
+    path = "/user/repos"
+    first = response([{"name": "api"}], headers={
+        "link": f'<{API_ORIGIN}{path}?page=2>; rel="next"',
+    })
+    # Both responses are individually below the 8 MiB transport limit.
+    # The second must hit the aggregate limit before its invalid JSON is decoded.
+    transport = FakeTransport({path: first, path + "?page=2": GitHubResponse(200, body=b"?")})
+    with pytest.raises(GitHubCollectionError, match="inventory byte budget"):
+        GitHubClient(TOKEN, transport=transport, max_inventory_bytes=len(first.body)).pages(path)
+    assert len(transport.calls) == 2
+
+
+def test_inventory_byte_budget_inclusive_boundary_and_configuration() -> None:
+    reply = response([1, 2])
+    transport = FakeTransport({"/user/repos": reply})
+    assert GitHubClient(
+        TOKEN, transport=transport, max_inventory_bytes=len(reply.body),
+    ).pages("/user/repos") == [1, 2]
+    for budget in (0, -1):
+        with pytest.raises(GitHubCollectionError, match="positive"):
+            GitHubClient(TOKEN, max_inventory_bytes=budget)
+
+
+def test_same_name_with_different_repository_id_stops_before_controls() -> None:
+    repo = repository(id=101)
+    routes = routes_for(repo)
+    routes["/repos/example/api"] = response(repository(id=202))
+    transport = FakeTransport(routes)
+    with pytest.raises(GitHubCollectionError, match="identity changed"):
+        collect_live_snapshot("example", client=GitHubClient(TOKEN, transport=transport))
+    assert transport.calls[-1] == API_ORIGIN + "/repos/example/api"
+    assert len(transport.calls) == 3
+
+
+@pytest.mark.parametrize("identifier", [None, True, 0, -1, "123", []])
+def test_repository_id_must_be_a_positive_integer(identifier: Any) -> None:
+    routes = routes_for(repository(id=identifier))
+    with pytest.raises(GitHubCollectionError, match="repository ID"):
+        collect(routes)
+
+
+def test_duplicate_repository_ids_under_different_names_are_refused() -> None:
+    routes = routes_for(repository(id=101))
+    routes["/orgs/example/repos?type=all&sort=full_name&per_page=100"] = response([
+        repository("api", id=101), repository("web", id=101),
+    ])
+    with pytest.raises(GitHubCollectionError, match="duplicate repository IDs"):
+        collect(routes)
+
+
+@pytest.mark.parametrize("next_page", ["1", "01", "%31"])
+def test_pagination_refuses_same_numeric_page_alias_before_second_request(next_page: str) -> None:
+    path = "/user/repos"
+    alias = path + "?page=" + next_page
+    transport = FakeTransport({
+        path: response([1], headers={"link": f'<{API_ORIGIN}{alias}>; rel="next"'}),
+        alias: response([2]),
+    })
+    with pytest.raises(GitHubCollectionError, match="pagination"):
+        GitHubClient(TOKEN, transport=transport).pages(path)
+    assert len(transport.calls) == 1
+
+
+def test_pagination_accepts_server_link_with_a_forward_jump() -> None:
+    path = "/user/repos"
+    transport = FakeTransport({
+        path: response([1], headers={"link": f'<{API_ORIGIN}{path}?page=3>; rel="next"'}),
+        path + "?page=3": response([3]),
+    })
+    assert GitHubClient(TOKEN, transport=transport).pages(path) == [1, 3]
+
+
+def test_rate_limit_header_names_and_optional_whitespace_follow_http_rules() -> None:
+    transport = FakeTransport({"/user": response({}, 403, {
+        "X-RateLimit-Remaining": " 00\t", "Retry-After": " 60 ",
+    })})
+    with pytest.raises(GitHubCollectionError, match=r"remaining=0.*retry_after_seconds=60"):
+        GitHubClient(TOKEN, transport=transport).get("/user")
+    assert len(transport.calls) == 1
+
+
+def test_multiple_link_fields_are_combined_without_dropping_the_next_page() -> None:
+    path = "/user/repos"
+    transport = FakeTransport({
+        path: response([1], headers={
+            "Link": f'<{API_ORIGIN}{path}>; rel="first"',
+            "link": f'<{API_ORIGIN}{path}?page=2>; rel="next"',
+        }),
+        path + "?page=2": response([2]),
+    })
+    assert GitHubClient(TOKEN, transport=transport).pages(path) == [1, 2]
+
+
+def test_urllib_preserves_repeated_link_fields_from_the_actual_http_parser() -> None:
+    reply = MagicMock()
+    reply.__enter__.return_value = reply
+    reply.read1.side_effect = [b"[]", b""]
+    reply.code = 200
+    reply.headers = HTTPMessage()
+    reply.headers.add_header("Link", f'<{API_ORIGIN}/user/repos>; rel="first"')
+    reply.headers.add_header("link", f'<{API_ORIGIN}/user/repos?page=2>; rel="next"')
+    with patch("ghorgsec.github_client.build_opener") as opener:
+        opener.return_value.open.return_value = reply
+        result = UrllibTransport().get(API_ORIGIN + "/user/repos", {}, 10, MAX_RESPONSE_BYTES)
+    assert 'rel="first"' in result.headers["link"]
+    assert 'rel="next"' in result.headers["link"]
 
 
 @pytest.mark.parametrize(

@@ -24,7 +24,7 @@ ausencia de vulnerabilidades ou conformidade. Consulte o [contrato live](docs/LI
 
 ## Escopo atual
 
-- CLI minima com Typer (`report`).
+- CLI com Typer (`report` e comparacao offline `compare`).
 - Modelo tipado de organizacao, repositorio e controles de seguranca.
 - Collector stub seguro, offline por padrao.
 - Collector live opt-in, com inventario paginado e gaps por controle.
@@ -33,6 +33,8 @@ ausencia de vulnerabilidades ou conformidade. Consulte o [contrato live](docs/LI
 - Sumario de postura: cobertura por controle, com `not_collected` excluido do denominador.
 - Classificacao de risco deterministica por repositorio (rubrica documentada).
 - Saida em Markdown ou JSON deterministico.
+- Proximos passos que distinguem controles desabilitados de lacunas de evidencia.
+- Comparacao local de dois snapshots com mudancas de estado, evidencia e escopo.
 - Testes unitarios sem chamadas de rede; ruff, mypy estrito e cobertura configurados.
 
 ## Limites do produto
@@ -69,6 +71,9 @@ Para desenvolvimento (ruff, mypy, pytest, coverage, build e pip-audit):
 ```bash
 python -m pip install -e ".[dev]"
 ```
+
+Para reproduzir o ambiente usado pela CI e criar o inventario de runtime, use o
+[guia de build e SBOM](docs/RELEASE.md). Os lockfiles incluem versoes e hashes.
 
 ## Uso
 
@@ -111,13 +116,43 @@ nem suas dependencias. Use a instalacao acima antes de executar os exemplos.
 - `--user`: conta pessoal autenticada, apenas com `--live`; nao combinavel com `--org`.
 - `--live`: habilita leituras na API GitHub usando `GH_TOKEN` ou `GITHUB_TOKEN`.
 - `--repo`: nome repetivel; no stub inclui nomes, no live filtra o inventario visivel ao token.
+- Com `--fixture`, `--repo` seleciona nomes sem distinguir maiusculas/minusculas,
+  mantendo a ordem da fonte. Nomes ausentes ou ambiguos sao recusados; todo o JSON
+  e validado antes da selecao e a cobertura passa a descrever somente o subconjunto.
 - `--fixture`: fixture JSON local a renderizar.
 - `--format`: `md` (padrao) ou `json`.
 - `--output` / `-o`: caminho de saida local opcional.
 
-`--fixture` nao aceita `--org`, `--repo`, `--user` ou `--live`. Codigo de saida 0 indica
+`--fixture` nao aceita `--org`, `--user` ou `--live`. Codigo de saida 0 indica
 relatorio gerado, mesmo com controles `unknown`; nao funciona como gate de seguranca.
 Erros de entrada, autenticacao, coleta ou arquivo retornam `Error:` e codigo 2.
+
+### Comparar snapshots locais
+
+Use dois arquivos JSON do mesmo owner, com timestamps e nomes de repositorio
+comparaveis. O segundo exemplo abaixo mostra apenas mudancas sinteticas:
+
+```bash
+ghorgsec compare --baseline examples/org-security-snapshot.json --current examples/org-security-snapshot-current.json
+ghorgsec compare --baseline examples/org-security-snapshot.json --current examples/org-security-snapshot-current.json --format json -o comparison.json
+```
+
+`compare` funciona offline, sem ler token. Aceita fixtures ou JSON gerado por `report`;
+recalcula as mudancas a partir dos controles e ignora scores e sumarios importados.
+O arquivo atual deve ter timestamp igual ou posterior ao baseline; owners diferentes
+sao recusados. Timestamps iguais sao aceitos com aviso. `--output` preserva ambos
+os arquivos de entrada, incluindo aliases por caminho resolvido e hard link.
+
+As classificacoes `enabled_observed` e `disabled_observed` representam transicoes
+entre estados conhecidos. `evidence_gained`, `evidence_lost` e `gap_changed` descrevem
+mudancas na evidencia disponivel. `scope_changed` indica outra default branch;
+a comparacao de branch protection passa a ter escopo diferente.
+
+Repositorios presentes em apenas um arquivo indicam mudanca de inventario dos
+snapshots. Filtros, permissoes, renomeacao ou coleta parcial podem explicar essa
+diferenca. Ela nao comprova criacao ou exclusao. Nomes e owners sao comparados
+exatamente; o comando nao identifica renomeacoes por ID. A comparacao local tambem
+nao autentica a origem dos arquivos nem comprova remediacao ou enforcement.
 
 ### Coleta real
 
@@ -183,7 +218,10 @@ A fixture aceita ainda um array opcional `warnings` com avisos nao vazios, rende
 
 O loader recusa uma fixture que declare a mesma chave JSON duas vezes: `json.loads` manteria a ultima ocorrencia, entao um documento que diz `disabled` e depois `enabled` seria lido como habilitado. Nomes de repositorio duplicados ja eram recusados; e a mesma regra um nivel abaixo. Uma fixture aninhada alem do limite de recursao tambem e recusada. Toda entrada malformada reporta `Error: ...` e sai com codigo 2.
 
-Valores de texto sao achatados em uma linha ao renderizar Markdown, para que uma quebra de linha em um nome ou aviso nao injete titulos nem parta a tabela de postura.
+Valores de texto sao achatados em uma linha e escapados ao renderizar Markdown.
+Nomes, branches e avisos com HTML, links ou marcadores Markdown ficam visiveis como
+texto no contrato CommonMark com tabelas. O JSON conserva os valores originais.
+Extensoes de outros visualizadores, como autolinks, podem alterar a apresentacao.
 
 Os controles tambem podem ser escritos diretamente no objeto do repositorio, sem `controls`.
 A fixture deve escolher uma das duas representacoes por repositorio; misturar as duas e recusado,
@@ -202,7 +240,10 @@ caminho e substituido; escolha um novo nome se precisar preservar a versao anter
 
 O relatorio inclui uma secao `Posture Summary` com contagem por estado de cada controle e a cobertura de "enabled". O denominador da cobertura exclui `not_collected`, para que um snapshot parcial nao reporte 0% enganoso.
 
-Quando nenhum repositorio reportou estado conhecido para um controle, o denominador e zero e a cobertura aparece como `not_assessed`. Um controle que ninguem coletou e um controle desligado em todo lugar sao afirmacoes diferentes, e antes as duas renderizavam como `0%`.
+Quando todos os estados de um controle sao `not_collected`, ou o inventario esta vazio,
+o denominador e zero e a cobertura aparece como `not_assessed`. Se todos os estados
+sao `unknown`, o denominador inclui esses repositorios e a cobertura habilitada e 0%;
+isso nao confirma que o controle esteja desabilitado.
 
 No JSON, cada controle inclui `assessed` (denominador) e `coverage_status` (`assessed` ou
 `not_assessed`). O campo numerico `coverage_percent` preserva o valor `0` quando o denominador
@@ -224,6 +265,18 @@ Cada linha de risco mostra a quantidade de controles nao coletados e `assessment
 `complete`, `partial` ou `not_assessed`. Uma classificacao `strong` em uma avaliacao `partial`
 descreve apenas os controles informados. `complete` significa que nenhum controle ficou como
 `not_collected`; controles `unknown` continuam explicitamente indeterminados.
+
+## Proximos passos
+
+O relatorio separa tres grupos: `disabled` sugere revisar configuracao com o owner;
+`unknown` sugere verificar acesso e permissoes de coleta; `not_collected` sugere
+coletar evidencia. Controles `enabled` nao geram item. Sao sugestoes para revisao,
+sem alterar configuracoes ou a rubrica de risco.
+
+O JSON acrescenta `next_steps`, uma lista de objetos com `repository`, `control`,
+`state` e `action`. As acoes sao `review_configuration`, `verify_access` e
+`collect_evidence`. A ordem usa o nome exato do repositorio e a ordem dos quatro
+controles modelados. Os campos anteriores do relatorio permanecem disponiveis.
 
 ## Qualidade
 
@@ -275,6 +328,8 @@ de attestations do GitHub](https://docs.github.com/en/actions/how-tos/secure-you
 - `src/ghorgsec/fixture_loader.py`: loader de snapshot a partir de JSON local.
 - `src/ghorgsec/summary.py`: agregacao de postura.
 - `src/ghorgsec/risk.py`: classificacao de risco deterministica.
+- `src/ghorgsec/actions.py`: sugestoes de revisao e coleta de evidencia.
+- `src/ghorgsec/comparison.py`: comparacao pura de snapshots locais.
 - `src/ghorgsec/report.py`: relatorio Markdown.
 - `src/ghorgsec/serialize.py`: serializacao JSON deterministica.
 - `src/ghorgsec/cli.py`: comandos Typer.

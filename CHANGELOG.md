@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Rendered fixture HTML and Markdown syntax as literal text in CommonMark reports,
+  including warnings and organization names containing backticks.
+- Added next steps for disabled controls and evidence gaps in Markdown and JSON,
+  preserving the existing risk rubric.
+- Added offline `compare` for two local snapshots, with observation and evidence
+  transitions, default-branch scope changes, and input-file overwrite protection.
+- Added a second synthetic snapshot and documented comparison limits.
+- Added sanitized rate-limit guidance from validated numeric response headers,
+  retaining immediate failure without automatic retries.
+- Bounded accumulated inventory responses to 16 MiB before decoding each page.
+- Checked repository IDs for uniqueness and inventory/metadata identity changes.
+- Allowed case-insensitive repository selection from a fully validated local fixture,
+  with explicit subset coverage and rejection of missing or ambiguous names.
+- Rejected non-increasing pagination numbers, including alternate numeric spellings,
+  while continuing to follow forward links supplied by GitHub.
+- Locked runtime, build and development packages with hashes; used those inputs in CI
+  and release builds, including the backend's editable-build dependency.
+- Added CycloneDX 1.6 runtime inventories with the application, verified archive hashes,
+  declared licenses and platform-aware dependency edges. CI qualifies installed wheels
+  on every supported matrix lane; release attestations retain their exact subject scope.
+
 ## 0.3.0 - 2026-10-06
 
 - Added explicit `--live` collection for organizations and the authenticated personal

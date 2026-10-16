@@ -10,6 +10,8 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from ghorgsec.actions import plan_next_steps
+from ghorgsec.comparison import SnapshotComparison
 from ghorgsec.models import OrgSecuritySnapshot, RepositorySecurityControls
 from ghorgsec.risk import RepositoryRisk, rate_repository
 from ghorgsec.summary import ControlCoverage, summarize_snapshot
@@ -30,6 +32,15 @@ def snapshot_to_dict(snapshot: OrgSecuritySnapshot) -> dict[str, Any]:
             "controls": [_coverage_to_dict(coverage) for coverage in summary.controls],
         },
         "repositories": [_repository_to_dict(repo) for repo in snapshot.repositories],
+        "next_steps": [
+            {
+                "repository": step.repository,
+                "control": step.control,
+                "state": step.state.value,
+                "action": step.action,
+            }
+            for step in plan_next_steps(snapshot)
+        ],
     }
 
 
@@ -37,6 +48,36 @@ def render_json_report(snapshot: OrgSecuritySnapshot) -> str:
     """Render a deterministic, indented JSON report for the snapshot."""
 
     return json.dumps(snapshot_to_dict(snapshot), indent=2, ensure_ascii=False)
+
+
+def render_json_comparison(comparison: SnapshotComparison) -> str:
+    """Render the versioned local-comparison contract without trusting input scores."""
+
+    data = {
+        "schema_version": 1,
+        "organization": comparison.organization,
+        "collection_mode": "local_snapshot_comparison",
+        "baseline_at": comparison.baseline_at.isoformat(),
+        "current_at": comparison.current_at.isoformat(),
+        "warnings": list(comparison.warnings),
+        "summary": {
+            "changed_controls": len(comparison.changes),
+            "unchanged_controls": comparison.unchanged_controls,
+        },
+        "added_repositories": list(comparison.added_repositories),
+        "missing_repositories": list(comparison.missing_repositories),
+        "changes": [
+            {
+                "repository": change.repository,
+                "control": change.control,
+                "before": change.before.value,
+                "after": change.after.value,
+                "classification": change.classification,
+            }
+            for change in comparison.changes
+        ],
+    }
+    return json.dumps(data, indent=2, ensure_ascii=False)
 
 
 def _coverage_to_dict(coverage: ControlCoverage) -> dict[str, Any]:

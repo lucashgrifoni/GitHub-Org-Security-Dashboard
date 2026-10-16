@@ -1,29 +1,39 @@
 ---
-type: "concept"
-title: "Posture and collection semantics"
-description: "Interpret four modeled controls without treating uncollected or unknown state as confirmed coverage."
-tags: ["posture","risk","coverage"]
+type: concept
+title: Posture states, coverage and review steps
+description: Interpret coverage, ratings and suggested next steps without confusing evidence gaps with disabled controls.
+tags: [posture, risk, coverage]
 verified:
   - by: openwiki/0.7.2
-    at: 2026-10-14T19:10:41.356Z
+    at: 2026-10-16T15:39:14.997Z
 sources:
+  - id: openwiki-source-392b215c646c65e1e6087d3f
+    resource: repo://src/ghorgsec/actions.py
   - id: openwiki-source-d91fed0bdf169594703376d2
     resource: repo://src/ghorgsec/risk.py
   - id: openwiki-source-5929f1cf6e538a0290462469
     resource: repo://src/ghorgsec/summary.py
-generated: { by: "codex", at: "2026-10-14T18:52:35.067Z" }
+generated: { by: "codex", at: "2026-10-16T15:39:14.997Z" }
 ---
 
-# Posture and collection semantics
+# Posture states, coverage and review steps
 
-## State and denominator
+## States and coverage
 
-The summary aggregates branch protection, secret scanning, code scanning and Dependabot alerts. `not_collected` is excluded from the coverage denominator; `unknown` remains in it. Coverage is the integer floor of enabled times 100 divided by enabled + disabled + unknown, returning zero if that denominator is zero ([summary](../../src/ghorgsec/summary.py#L14-L61)). A zero value without collected controls therefore carries a different meaning from observed disabled controls.
+The four controls are branch protection, secret scanning, code scanning and Dependabot alerts. `not_collected` is excluded from coverage; `unknown` remains in the denominator. Coverage is the integer floor of enabled times 100 divided by enabled + disabled + unknown. The numeric value is zero for an empty denominator, while serialization exposes `coverage_status=not_assessed` so consumers can distinguish that case ([coverage](../../src/ghorgsec/summary.py#L23-L60), [JSON fields](../../src/ghorgsec/serialize.py#L80-L98)).
 
-## Rating is a transparent rubric
+An all-unknown control has an assessed denominator and zero enabled coverage. It is not a control that was never collected, and does not establish that the configuration is disabled.
 
-The rating weights disabled as 2, unknown as 1 and enabled as 0, excluding not-collected controls. With no assessed controls the rating is `not_assessed`; otherwise score 0 is strong, scores 1–2 moderate and scores 3 or more weak. The assessment-status property separately identifies absent, partial or complete collection ([rubric](../../src/ghorgsec/risk.py)). A strong label applies to this rubric's observed fields and is not a security certification.
+## Ratings and collection completeness
 
-## Preserve collection limits
+The rubric assigns 2 points to disabled, 1 to unknown and 0 to enabled; not-collected controls are excluded. With no assessed controls, rating is `not_assessed`. Otherwise score 0 is strong, scores 1 or 2 moderate, and scores 3 or more weak. `assessment_status` separately records complete, partial or absent collection ([rubric](../../src/ghorgsec/risk.py#L48-L114)).
 
-The live collector's warnings describe non-atomic collection, token visibility and default-branch scope. Do not promote a repository state into account-wide coverage or enforcement quality ([warnings](../../src/ghorgsec/live_collector.py#L55-L67)). Return to [collection flow](../architecture/collection-and-report.md) to trace where a warning originated, or [quickstart](../quickstart.md) to select an input mode.
+A complete assessment can still contain unknown controls: complete means no field is `not_collected`. A strong label applies only to the supplied fields and rubric. It does not certify security or enforcement.
+
+## Suggested review steps
+
+The planner creates one item for each non-enabled control. Disabled suggests reviewing configuration, unknown suggests checking evidence access, and not-collected suggests collecting evidence. Enabled creates no suggestion. Items are ordered by the exact repository name and modeled control order; the planner neither changes configuration nor modifies the score ([planner](../../src/ghorgsec/actions.py#L8-L42)).
+
+## Observation limits
+
+Live warnings preserve token visibility, sequential collection and default-branch scope. Advanced scanning can remain unknown when the default-setup endpoint cannot establish current configuration. The absence of a finding is not an absence-of-vulnerability claim. See [collection flow](../architecture/collection-and-report.md) and [snapshot review](../workflows/snapshot-review.md) before interpreting a changed state as remediation.

@@ -5,6 +5,7 @@ import os
 import socket
 import subprocess
 import sys
+from datetime import datetime, timedelta
 from importlib.metadata import distribution
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -76,9 +77,53 @@ def main() -> None:
             assert stdout.returncode == written.returncode == 0, (stdout.stderr, written.stderr)
             assert stdout.stdout == target.read_bytes()
             if format_name == "json":
-                assert json.loads(stdout.stdout)["collection_mode"] == "fixture_json"
+                parsed = json.loads(stdout.stdout)
+                assert parsed["collection_mode"] == "fixture_json"
+                assert "next_steps" in parsed
             else:
                 assert b"Repository Risk" in stdout.stdout
+
+        fixture_payload = json.loads(fixture.read_text(encoding="utf-8"))
+        if fixture_payload["repositories"]:
+            selected_name = fixture_payload["repositories"][0]["name"]
+            selected = invoke(
+                "report", "--fixture", str(fixture), "--repo", selected_name, "--format", "json",
+            )
+            assert selected.returncode == 0, selected.stderr
+            subset = json.loads(selected.stdout)
+            assert [item["name"] for item in subset["repositories"]] == [selected_name]
+            assert any("filter applied" in warning for warning in subset["warnings"])
+
+        baseline = root / "report with spaces.json"
+        current = root / "current.json"
+        payload = json.loads(baseline.read_text(encoding="utf-8"))
+        payload["generated_at"] = (
+            datetime.fromisoformat(payload["generated_at"]) + timedelta(days=1)
+        ).isoformat()
+        payload["repositories"][0]["controls"]["dependabot_alerts"] = "disabled"
+        current.write_text(json.dumps(payload), encoding="utf-8")
+        preserved = baseline.read_bytes(), current.read_bytes()
+        for format_name in ("md", "json"):
+            compare_arguments = (
+                "compare", "--baseline", str(baseline), "--current", str(current),
+                "--format", format_name,
+            )
+            stdout = invoke(*compare_arguments)
+            target = root / f"comparison.{format_name}"
+            written = invoke(*compare_arguments, "-o", str(target))
+            assert stdout.returncode == written.returncode == 0, (stdout.stderr, written.stderr)
+            assert stdout.stdout == target.read_bytes()
+            assert b"synthetic-token-canary" not in stdout.stdout
+            if format_name == "json":
+                comparison = json.loads(stdout.stdout)
+                assert comparison["schema_version"] == 1
+                assert comparison["collection_mode"] == "local_snapshot_comparison"
+                assert comparison["summary"]["changed_controls"] == 1
+                assert comparison["changes"][0]["classification"] == "disabled_observed"
+        conflict = invoke("compare", "--baseline", str(baseline), "--current", str(current),
+                          "-o", str(current))
+        assert conflict.returncode == 2 and b"--output must not overwrite" in conflict.stderr
+        assert (baseline.read_bytes(), current.read_bytes()) == preserved
 
         stub = invoke(
             "report", "--org", "example-org", "--repo", "api", "--format", "json", module=True
