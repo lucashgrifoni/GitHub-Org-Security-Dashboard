@@ -1,11 +1,15 @@
 ---
 type: page
 title: Build and runtime inventory
-description: Understand frozen Python inputs, installed-wheel qualification and runtime inventory boundaries.
-tags: [build, inventory, supply-chain]
+description: Understand frozen Python inputs, installed-wheel qualification and
+  runtime inventory boundaries.
+tags:
+  - build
+  - inventory
+  - supply-chain
 verified:
   - by: openwiki/0.7.2
-    at: 2026-10-16T16:15:01.720Z
+    at: 2026-10-16T16:23:41.573Z
 sources:
   - id: openwiki-source-164e2da859b5277df81c7d94
     resource: repo://.github/workflows/ci.yml
@@ -15,6 +19,8 @@ sources:
     resource: repo://docs/RELEASE.md
   - id: openwiki-source-c9cd1e222fe54637129c8ea3
     resource: repo://scripts/build_sbom.py
+  - id: openwiki-source-9e0c0b0c6547cab8b6416cbc
+    resource: repo://tests/test_sbom.py
 generated: { by: "codex", at: "2026-10-16T16:15:01.720Z" }
 ---
 

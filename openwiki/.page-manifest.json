@@ -9,18 +9,18 @@
       "completedRunId": "04456cfa-772b-4094-956d-53fb8afe1b9d"
     },
     "/openwiki/concepts/posture-semantics.md": {
-      "gitHead": "87fc9cc0e5245735913d931f71f7429d74f2254e",
-      "sourceFingerprint": "sha256:6462a689e8c0eff9cd6947942cec285ddd828c6e53e3082d3edd46a78d307945",
-      "pageVersion": "sha256:38bbc3799589b8f6be3fa58f50318227e0950ebbc34688e61de8e85cd7758c8b",
+      "pageVersion": "sha256:59e478dad2ede2e383c1dba33cd4489cf56f236e71e4eb489d9a6eb67ff3e967",
       "completedBy": "codex",
-      "completedRunId": "04456cfa-772b-4094-956d-53fb8afe1b9d"
+      "completedRunId": "0fe0d4ad-7a91-4993-aa6d-d768f399fec9",
+      "gitHead": "487f22aec65b009112869187e697a1ef340b69e0",
+      "sourceFingerprint": "sha256:f61504ad017883ed7caf669f545308e25614294550edc0fa438660253dfc7d4c"
     },
     "/openwiki/operations/build-and-inventory.md": {
-      "pageVersion": "sha256:d54bf19d8d5c4c32cd67ecf015c214e0be2e195587ad43332991b843f8a0f102",
+      "pageVersion": "sha256:10e2c3fde01cbe5b42ca11a3900d1aed1c3af38dd904bc7761dcec0b3beb520b",
       "completedBy": "codex",
-      "completedRunId": "62e79426-80ca-4506-be8d-b4d38f71677b",
-      "gitHead": "9c27a01a3087c12a4fa097e15980d92fefff7202",
-      "sourceFingerprint": "sha256:85358f999ba58e83d14c7c32001754341ac3105e8c9dff87cf9df46d38adc124"
+      "completedRunId": "0fe0d4ad-7a91-4993-aa6d-d768f399fec9",
+      "gitHead": "487f22aec65b009112869187e697a1ef340b69e0",
+      "sourceFingerprint": "sha256:f61504ad017883ed7caf669f545308e25614294550edc0fa438660253dfc7d4c"
     },
     "/openwiki/quickstart.md": {
       "gitHead": "87fc9cc0e5245735913d931f71f7429d74f2254e",

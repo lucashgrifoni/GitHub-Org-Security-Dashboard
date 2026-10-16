@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:d54bf19d8d5c4c32cd67ecf015c214e0be2e195587ad43332991b843f8a0f102",
+  "pageVersion": "sha256:10e2c3fde01cbe5b42ca11a3900d1aed1c3af38dd904bc7761dcec0b3beb520b",
   "claims": [
     {
       "id": "claim_ceaf145a238a462fb35fe5f11a19020c",
@@ -17,8 +17,8 @@
       "statement": "The runtime inventory verifies the application archive hash, resolves active marker/extra-aware dependency edges, and rejects missing, incompatible, duplicate, yanked or orphaned packages.",
       "evidence": [
         {
-          "resource": "repo://scripts/build_sbom.py#L23-L108",
-          "version": "repo-lines-v1:sha256:e982aba4e4dfb0b0cc0d2c76f22af5b7cb93efee8218676bd661257bd50bdb5a:eyJzZWxlY3RlZExpbmVDb3VudCI6ODYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyNmU0YzBjN2Q4M2YwZTUzMjcwMzllNDE5YWM0ODlkNTM3OGU4NDA4MzM5YzU0ZjMwMGUwNzg4NGRlOGUzNjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUxY2U0OWM2ZjlmMWRiYWVlN2I5N2ZkMTQ2YTJlMDAzZDJjZmZjMDVhMGQ1NDc2Y2ZhMTVhZWY3ZWE3ZjQ4MGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBmMTA1MjEwOTNiZGVmNzc2NWY4YzQ2ZGU3NGQ0NjE3ZWE3NzU1ZjEzZWQ2MDE5OGE5NjczOGZiYmRhZGZkYmEifQ"
+          "resource": "repo://scripts/build_sbom.py",
+          "version": "repo-file-v1:sha256:f81e7669a2470f13bdc4849deab82eeda61440240acef1fbf41693a1cc1f98ef"
         }
       ]
     },
@@ -27,7 +27,7 @@
       "statement": "Inventory licenses retain declared SPDX expressions or literal legacy/classifier information; missing license declarations stay explicit.",
       "evidence": [
         {
-          "resource": "repo://scripts/build_sbom.py#L111-L146",
+          "resource": "repo://scripts/build_sbom.py#L113-L148",
           "version": "repo-lines-v1:sha256:c353e10e6ade25100d2ba50504b2208f23e2a9b061543e76d591195f0a898b44:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYwZmNhZDFjZjk0MTdlNjgxOTcxMDJhOGUyOTk2MjljNWVkNzBkYTQxZjVkN2M2ZjMwYjdjYjlmMzMzMjY0MzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5MWZmNTQyM2ZkNTMyMTVhNzRmM2U1YzNmMmRjMmY3NDkwNzM4ZDJlNWE0MDQ0M2Q3ODUxNWIyODAyOGJlZGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmYmQwMDkzMTRiYzI3MDg0MTY3MzRhMDJhZTVmZjM5YTFlNDhhMDUwYmU5MWY0M2IyZmFhOTIwMDJjNjJiZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU0OGQ3NDgzZDA2MGYxNzIyZTI0NTM2ODg4MzM0MjU2YjU0OTBlOGJiZTg2OTgyMDY3NmNhOWVhZjM1MDljYzkifQ"
         }
       ]
@@ -51,10 +51,24 @@
           "version": "repo-lines-v1:sha256:66935dac093e5c6780bb8774bedb8014aa65a68d9ac00c3284dcf62ed0f1c8b0:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTMwYTI4NGRhYmE5Yjg3NDk5ODkyMTA2NjdkOTZlNmU3ZjhjZTIzODRiN2MxYjU2ZWJjMjgwN2Y4ODBiY2Q0MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiY2U4NzFjNmUwMzI0NzI0YzlmYmQ0OTJkMjA5ZjkyMjlmY2I3YjdkMGVjMjVhNGU0NGRiZTY3ZDU1ZWJkYTU4YSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZGM4OGUxYjA0ZGNmNmUzZDE0ZjM5NmExNzEwZjM3NTNkYmUzNDkxM2VhOTcxZWJiZGVjZGZlNTFiNWEzYWI1YSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
         }
       ]
+    },
+    {
+      "id": "claim_5c750bd921da4bf7a756c29d45a668c3",
+      "statement": "Each generated runtime inventory receives an RFC4122 UUID serial number for attestation consumers.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/build_sbom.py",
+          "version": "repo-file-v1:sha256:f81e7669a2470f13bdc4849deab82eeda61440240acef1fbf41693a1cc1f98ef"
+        },
+        {
+          "resource": "repo://tests/test_sbom.py#L33-L42",
+          "version": "repo-lines-v1:sha256:0812919418634f678f56474f49b0ae4a57f7f8860cab540e4496ed022d37414b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhZThiZDUzMTNjZTlkYThlMTZhZGZlNmRjZDJjYmY0N2YyMDJjMmQ0OWQzODEwOWY0NWU5NDU5NjUwNzdlOGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg2ZGYyNWI1MjhkMWIyMDQ2ZTFkM2RjYTQ0MTE0NDZiZTczMWE4MzExYzMyZjFhMTEzM2ZiNGY1M2YwMjdiMTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmYmQwMDkzMTRiYzI3MDg0MTY3MzRhMDJhZTVmZjM5YTFlNDhhMDUwYmU5MWY0M2IyZmFhOTIwMDJjNjJiZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxNDQ5NjAwZGNhODEyNjYwM2Y2NjY5OTkwMWMzZWUxZTgwYmJiOTZjYWM0OTQ5ZGJmZjQ2MWU4MjFlMWFjOGEifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-10-16T16:15:01.720Z"
+    "at": "2026-10-16T16:23:41.573Z"
   }
 }

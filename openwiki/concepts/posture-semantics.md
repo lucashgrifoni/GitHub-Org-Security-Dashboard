@@ -1,11 +1,15 @@
 ---
 type: concept
 title: Posture states, coverage and review steps
-description: Interpret coverage, ratings and suggested next steps without confusing evidence gaps with disabled controls.
-tags: [posture, risk, coverage]
+description: Interpret coverage, ratings and suggested next steps without
+  confusing evidence gaps with disabled controls.
+tags:
+  - posture
+  - risk
+  - coverage
 verified:
   - by: openwiki/0.7.2
-    at: 2026-10-16T15:39:14.997Z
+    at: 2026-10-16T16:23:41.573Z
 sources:
   - id: openwiki-source-392b215c646c65e1e6087d3f
     resource: repo://src/ghorgsec/actions.py
